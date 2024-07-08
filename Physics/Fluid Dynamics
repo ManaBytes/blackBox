@@ -1,384 +1,494 @@
-<html><head><base href=https://graeycowl.github.io/>
-<title>Fluid Dynamics Simulator - Advanced Mode</title>
-<style>
-  body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f0f8ff;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  header {
-    background-color: #1e90ff;
-    color: white;
-    text-align: center;
-    padding: 1em;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  main {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2em;
-  }
-  .simulator {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    padding: 2em;
-    text-align: center;
-  }
-  #fluidCanvas {
-    border: 1px solid #ddd;
-    background-color: #f0f0f0;
-  }
-  .controls {
-    margin-top: 1em;
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  button, select {
-    background-color: #1e90ff;
-    color: white;
-    border: none;
-    padding: 0.5em 1em;
-    margin: 0.5em;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  button:hover, select:hover {
-    background-color: #4169e1;
-  }
-  select {
-    appearance: none;
-    padding-right: 1.5em;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23ffffff' d='M0 0l4 4 4-4z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.5em center;
-  }
-  .info-panel {
-    background-color: #e6f3ff;
-    border: 1px solid #1e90ff;
-    border-radius: 5px;
-    padding: 1em;
-    margin-top: 1em;
-    text-align: left;
-  }
-  .info-panel h3 {
-    margin-top: 0;
-    color: #1e90ff;
-  }
-  .parameter-display {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5em;
-  }
-  .parameter-name {
-    font-weight: bold;
-  }
-  #advancedControls {
-    margin-top: 1em;
-    border-top: 1px solid #ddd;
-    padding-top: 1em;
-  }
-  input[type="range"] {
-    width: 100%;
-    margin: 0.5em 0;
-  }
-  .slider-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5em;
-  }
-  .slider-container label {
-    flex: 1;
-    margin-right: 1em;
-  }
-  .slider-value {
-    min-width: 3em;
-    text-align: right;
-  }
-  footer {
-    background-color: #333;
-    color: white;
-    text-align: center;
-    padding: 1em;
-    margin-top: auto;
-  }
-  .footer-links {
-    display: flex;
-    justify-content: center;
-    gap: 1em;
-    margin-top: 0.5em;
-  }
-  .footer-links a {
-    color: #1e90ff;
-    text-decoration: none;
-  }
-  .footer-links a:hover {
-    text-decoration: underline;
-  }
-</style>
-</head>
-<body>
-  <header>
-    <h1>Fluid Dynamics Simulator - Advanced Mode</h1>
-  </header>
-  
-  <main>
-    <div class="simulator">
-      <canvas id="fluidCanvas" width="600" height="400"></canvas>
-      <div class="controls">
-        <button onclick="resetSimulation()">Reset</button>
-        <button onclick="togglePause()">Pause/Resume</button>
-        <select id="viscositySelect" onchange="changeViscosity()">
-          <option value="0.1">Low Viscosity</option>
-          <option value="0.5" selected>Medium Viscosity</option>
-          <option value="1.0">High Viscosity</option>
-        </select>
-        <select id="flowTypeSelect" onchange="changeFlowType()">
-          <option value="laminar">Laminar Flow</option>
-          <option value="turbulent">Turbulent Flow</option>
-        </select>
-      </div>
-      <div class="info-panel">
-        <h3>Simulation Parameters</h3>
-        <div class="parameter-display">
-          <span class="parameter-name">Viscosity:</span>
-          <span id="viscosityValue">0.5 (Medium)</span>
-        </div>
-        <div class="parameter-display">
-          <span class="parameter-name">Flow Type:</span>
-          <span id="flowTypeValue">Turbulent</span>
-        </div>
-        <div class="parameter-display">
-          <span class="parameter-name">Particle Count:</span>
-          <span id="particleCount">1000</span>
-        </div>
-        <div class="parameter-display">
-          <span class="parameter-name">Reynolds Number:</span>
-          <span id="reynoldsNumber">2245.68</span>
-        </div>
-      </div>
-      <div id="advancedControls">
-        <h3>Advanced Controls</h3>
-        <div class="slider-container">
-          <label for="temperatureSlider">Temperature:</label>
-          <input type="range" id="temperatureSlider" min="0" max="100" value="20" onchange="updateTemperature()">
-          <span id="temperatureValue" class="slider-value">20°C</span>
-        </div>
-        <div class="slider-container">
-          <label for="pressureSlider">Pressure:</label>
-          <input type="range" id="pressureSlider" min="1" max="10" value="1" step="0.1" onchange="updatePressure()">
-          <span id="pressureValue" class="slider-value">1 atm</span>
-        </div>
-        <div class="slider-container">
-          <label for="obstacleSlider">Obstacle Density:</label>
-          <input type="range" id="obstacleSlider" min="0" max="100" value="0" onchange="updateObstacles()">
-          <span id="obstacleValue" class="slider-value">0%</span>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <footer>
-    <p>Explore advanced fluid dynamics concepts with this interactive simulation!</p>
-    <div class="footer-links">
-      <a href="https://websim.ai/c/computational-fluid-dynamics">Computational Fluid Dynamics</a>
-      <a href="https://websim.ai/c/navier-stokes-equations">Navier-Stokes Equations</a>
-      <a href="https://websim.ai/c/fluid-mechanics-applications">Fluid Mechanics Applications</a>
-    </div>
-  </footer>
-
-  <script>
-    const canvas = document.getElementById('fluidCanvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
-    let obstacles = [];
-    let isPaused = false;
-    let viscosity = 0.5;
-    let flowType = 'turbulent';
-    const particleCount = 1000;
-    let averageVelocity = 0;
-    let temperature = 20;
-    let pressure = 1;
-    let obstacleDensity = 0;
-
-    function Particle(x, y) {
-      this.x = x;
-      this.y = y;
-      this.vx = 0;
-      this.vy = 0;
-      this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-    }
-
-    function Obstacle(x, y, radius) {
-      this.x = x;
-      this.y = y;
-      this.radius = radius;
-    }
-
-    function initializeParticles() {
-      particles = [];
-      for (let i = 0; i < particleCount; i++) {
-        particles.push(new Particle(Math.random() * canvas.width, Math.random() * canvas.height));
+<html><head><base href="https://graeycowl.github.io/">
+    <title>Fluid Dynamics Simulator - Expert Mode</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f0f8ff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
       }
-      updateInfoPanel();
-    }
-
-    function initializeObstacles() {
-      obstacles = [];
-      const obstacleCount = Math.floor((canvas.width * canvas.height * obstacleDensity) / 10000);
-      for (let i = 0; i < obstacleCount; i++) {
-        obstacles.push(new Obstacle(
-          Math.random() * canvas.width,
-          Math.random() * canvas.height,
-          Math.random() * 10 + 5
-        ));
+      header {
+        background-color: #1e90ff;
+        color: white;
+        text-align: center;
+        padding: 1em;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       }
-    }
-
-    function resetSimulation() {
-      initializeParticles();
-      initializeObstacles();
-    }
-
-    function togglePause() {
-      isPaused = !isPaused;
-    }
-
-    function changeViscosity() {
-      viscosity = parseFloat(document.getElementById('viscositySelect').value);
-      updateInfoPanel();
-    }
-
-    function changeFlowType() {
-      flowType = document.getElementById('flowTypeSelect').value;
-      updateInfoPanel();
-    }
-
-    function updateTemperature() {
-      temperature = parseInt(document.getElementById('temperatureSlider').value);
-      document.getElementById('temperatureValue').textContent = `${temperature}°C`;
-      updateInfoPanel();
-    }
-
-    function updatePressure() {
-      pressure = parseFloat(document.getElementById('pressureSlider').value);
-      document.getElementById('pressureValue').textContent = `${pressure.toFixed(1)} atm`;
-      updateInfoPanel();
-    }
-
-    function updateObstacles() {
-      obstacleDensity = parseInt(document.getElementById('obstacleSlider').value);
-      document.getElementById('obstacleValue').textContent = `${obstacleDensity}%`;
-      initializeObstacles();
-      updateInfoPanel();
-    }
-
-    function updateInfoPanel() {
-      document.getElementById('viscosityValue').textContent = `${viscosity} (${getViscosityLabel(viscosity)})`;
-      document.getElementById('flowTypeValue').textContent = flowType.charAt(0).toUpperCase() + flowType.slice(1);
-      document.getElementById('particleCount').textContent = particleCount;
-      calculateReynoldsNumber();
-    }
-
-    function getViscosityLabel(value) {
-      if (value <= 0.1) return 'Low';
-      if (value <= 0.5) return 'Medium';
-      return 'High';
-    }
-
-    function calculateReynoldsNumber() {
-      const characteristicLength = canvas.width;
-      const density = pressure / (0.287 * (temperature + 273.15));
-      const reynoldsNumber = (density * averageVelocity * characteristicLength) / viscosity;
-      document.getElementById('reynoldsNumber').textContent = reynoldsNumber.toFixed(2);
-    }
-
-    function update() {
-      if (!isPaused) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw obstacles
-        obstacles.forEach(obstacle => {
-          ctx.beginPath();
-          ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(100, 100, 100, 0.5)';
-          ctx.fill();
-        });
-
-        let totalVelocity = 0;
-
-        particles.forEach(particle => {
-          // Apply flow dynamics
-          if (flowType === 'laminar') {
-            particle.vx = (canvas.width / 2 - particle.x) * 0.01;
-            particle.vy = Math.sin(particle.x * 0.02) * 2;
-          } else {
-            particle.vx += (Math.random() - 0.5) * 0.5;
-            particle.vy += (Math.random() - 0.5) * 0.5;
+      main {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 2em;
+      }
+      .simulator {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        padding: 2em;
+        text-align: center;
+        max-width: 800px;
+        width: 100%;
+      }
+      #fluidCanvas {
+        border: 1px solid #ddd;
+        background-color: #f0f0f0;
+        max-width: 100%;
+        height: auto;
+      }
+      .controls {
+        margin-top: 1em;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      button, select {
+        background-color: #1e90ff;
+        color: white;
+        border: none;
+        padding: 0.5em 1em;
+        margin: 0.5em;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      button:hover, select:hover {
+        background-color: #4169e1;
+      }
+      select {
+        appearance: none;
+        padding-right: 1.5em;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23ffffff' d='M0 0l4 4 4-4z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.5em center;
+      }
+      .info-panel, #advancedControls {
+        background-color: #e6f3ff;
+        border: 1px solid #1e90ff;
+        border-radius: 5px;
+        padding: 1em;
+        margin-top: 1em;
+        text-align: left;
+      }
+      .info-panel h3, #advancedControls h3 {
+        margin-top: 0;
+        color: #1e90ff;
+      }
+      .parameter-display {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5em;
+      }
+      .parameter-name {
+        font-weight: bold;
+      }
+      .slider-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5em;
+      }
+      .slider-container label {
+        flex: 1;
+        margin-right: 1em;
+      }
+      .slider-value {
+        min-width: 3em;
+        text-align: right;
+      }
+      input[type="range"] {
+        width: 50%;
+        margin: 0 1em;
+      }
+      #expertControls {
+        margin-top: 1em;
+        border-top: 1px solid #ddd;
+        padding-top: 1em;
+      }
+      #fluidTypeSelect {
+        width: 100%;
+        margin-bottom: 1em;
+      }
+      #vortexControls {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1em;
+      }
+      #vortexControls button {
+        flex: 1;
+        margin: 0 0.5em;
+      }
+      footer {
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 1em;
+        margin-top: auto;
+      }
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 1em;
+        margin-top: 0.5em;
+      }
+      .footer-links a {
+        color: #1e90ff;
+        text-decoration: none;
+      }
+      .footer-links a:hover {
+        text-decoration: underline;
+      }
+    </style>
+    </head>
+    <body>
+      <header>
+        <h1>Fluid Dynamics Simulator - Expert Mode</h1>
+      </header>
+      
+      <main>
+        <div class="simulator">
+          <canvas id="fluidCanvas" width="600" height="400"></canvas>
+          <div class="controls">
+            <button onclick="resetSimulation()">Reset</button>
+            <button onclick="togglePause()">Pause/Resume</button>
+            <select id="viscositySelect" onchange="changeViscosity()">
+              <option value="0.1" selected>Low Viscosity</option>
+              <option value="0.5">Medium Viscosity</option>
+              <option value="1.0">High Viscosity</option>
+            </select>
+            <select id="flowTypeSelect" onchange="changeFlowType()">
+              <option value="laminar" selected>Laminar Flow</option>
+              <option value="turbulent">Turbulent Flow</option>
+            </select>
+          </div>
+          <div class="info-panel">
+            <h3>Simulation Parameters</h3>
+            <div class="parameter-display">
+              <span class="parameter-name">Viscosity:</span>
+              <span id="viscosityValue">0.1 (Low)</span>
+            </div>
+            <div class="parameter-display">
+              <span class="parameter-name">Flow Type:</span>
+              <span id="flowTypeValue">Laminar</span>
+            </div>
+            <div class="parameter-display">
+              <span class="parameter-name">Particle Count:</span>
+              <span id="particleCount">1000</span>
+            </div>
+            <div class="parameter-display">
+              <span class="parameter-name">Reynolds Number:</span>
+              <span id="reynoldsNumber">1160.67</span>
+            </div>
+          </div>
+          <div id="advancedControls">
+            <h3>Advanced Controls</h3>
+            <div class="slider-container">
+              <label for="temperatureSlider">Temperature:</label>
+              <input type="range" id="temperatureSlider" min="0" max="100" value="33" onchange="updateTemperature()">
+              <span id="temperatureValue" class="slider-value">33°C</span>
+            </div>
+            <div class="slider-container">
+              <label for="pressureSlider">Pressure:</label>
+              <input type="range" id="pressureSlider" min="1" max="10" value="5.1" step="0.1" onchange="updatePressure()">
+              <span id="pressureValue" class="slider-value">5.1 atm</span>
+            </div>
+            <div class="slider-container">
+              <label for="obstacleSlider">Obstacle Density:</label>
+              <input type="range" id="obstacleSlider" min="0" max="100" value="6" onchange="updateObstacles()">
+              <span id="obstacleValue" class="slider-value">6%</span>
+            </div>
+          </div>
+          <div id="expertControls">
+            <h3>Expert Controls</h3>
+            <select id="fluidTypeSelect" onchange="changeFluidType()">
+              <option value="water">Water</option>
+              <option value="oil">Oil</option>
+              <option value="air">Air</option>
+              <option value="plasma">Plasma</option>
+            </select>
+            <div id="vortexControls">
+              <button onclick="addVortex('clockwise')">Add Clockwise Vortex</button>
+              <button onclick="addVortex('counterclockwise')">Add Counterclockwise Vortex</button>
+            </div>
+            <div class="slider-container">
+              <label for="compressibilitySlider">Compressibility:</label>
+              <input type="range" id="compressibilitySlider" min="0" max="1" value="0" step="0.01" onchange="updateCompressibility()">
+              <span id="compressibilityValue" class="slider-value">0</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    
+      <footer>
+        <p>Explore complex fluid dynamics phenomena with this advanced simulation tool!</p>
+        <div class="footer-links">
+          <!-- <a href="https://websim.ai/c/multiphase-flow">Multiphase Flow Simulation</a>
+          <a href="https://websim.ai/c/magnetohydrodynamics">Magnetohydrodynamics Simulator</a>
+          <a href="https://websim.ai/c/fluid-structure-interaction">Fluid-Structure Interaction</a> -->
+        </div>
+      </footer>
+    
+      <script>
+        const canvas = document.getElementById('fluidCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let obstacles = [];
+        let vortices = [];
+        let isPaused = false;
+        let viscosity = 0.1;
+        let flowType = 'laminar';
+        const particleCount = 1000;
+        let averageVelocity = 0;
+        let temperature = 33;
+        let pressure = 5.1;
+        let obstacleDensity = 6;
+        let fluidType = 'water';
+        let compressibility = 0;
+    
+        function Particle(x, y) {
+          this.x = x;
+          this.y = y;
+          this.vx = 0;
+          this.vy = 0;
+          this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+          this.density = getFluidDensity();
+        }
+    
+        function Obstacle(x, y, radius) {
+          this.x = x;
+          this.y = y;
+          this.radius = radius;
+        }
+    
+        function Vortex(x, y, strength, direction) {
+          this.x = x;
+          this.y = y;
+          this.strength = strength;
+          this.direction = direction;
+        }
+    
+        function getFluidDensity() {
+          switch(fluidType) {
+            case 'water': return 1000;
+            case 'oil': return 900;
+            case 'air': return 1.225;
+            case 'plasma': return 0.1;
+            default: return 1000;
           }
-
-          // Apply temperature and pressure effects
-          const tempFactor = 1 + (temperature - 20) / 100;
-          const pressureFactor = pressure;
-          particle.vx *= tempFactor * pressureFactor;
-          particle.vy *= tempFactor * pressureFactor;
-
-          // Apply viscosity
-          particle.vx *= (1 - viscosity * 0.01);
-          particle.vy *= (1 - viscosity * 0.01);
-
-          // Check collision with obstacles
-          obstacles.forEach(obstacle => {
-            const dx = particle.x - obstacle.x;
-            const dy = particle.y - obstacle.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < obstacle.radius + 2) {
-              const angle = Math.atan2(dy, dx);
-              particle.x = obstacle.x + (obstacle.radius + 2) * Math.cos(angle);
-              particle.y = obstacle.y + (obstacle.radius + 2) * Math.sin(angle);
-              particle.vx = -particle.vx;
-              particle.vy = -particle.vy;
-            }
-          });
-
-          // Update position
-          particle.x += particle.vx;
-          particle.y += particle.vy;
-
-          // Wrap around edges
-          if (particle.x > canvas.width) particle.x = 0;
-          if (particle.x < 0) particle.x = canvas.width;
-          if (particle.y > canvas.height) particle.y = 0;
-          if (particle.y < 0) particle.y = canvas.height;
-
-          // Calculate total velocity for Reynolds number
-          totalVelocity += Math.sqrt(particle.vx * particle.vx + particle.vy * particle.vy);
-
-          // Draw particle
-          ctx.beginPath();
-          ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
-          ctx.fillStyle = particle.color;
-          ctx.fill();
-        });
-
-        averageVelocity = totalVelocity / particleCount;
-        calculateReynoldsNumber();
-      }
-
-      requestAnimationFrame(update);
-    }
-
-    initializeParticles();
-    initializeObstacles();
-    update();
-  </script>
-</body>
-</html>
+        }
+    
+        function initializeParticles() {
+          particles = [];
+          for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle(Math.random() * canvas.width, Math.random() * canvas.height));
+          }
+          updateInfoPanel();
+        }
+    
+        function initializeObstacles() {
+          obstacles = [];
+          const obstacleCount = Math.floor((canvas.width * canvas.height * obstacleDensity) / 10000);
+          for (let i = 0; i < obstacleCount; i++) {
+            obstacles.push(new Obstacle(
+              Math.random() * canvas.width,
+              Math.random() * canvas.height,
+              Math.random() * 10 + 5
+            ));
+          }
+        }
+    
+        function resetSimulation() {
+          initializeParticles();
+          initializeObstacles();
+          vortices = [];
+        }
+    
+        function togglePause() {
+          isPaused = !isPaused;
+        }
+    
+        function changeViscosity() {
+          viscosity = parseFloat(document.getElementById('viscositySelect').value);
+          updateInfoPanel();
+        }
+    
+        function changeFlowType() {
+          flowType = document.getElementById('flowTypeSelect').value;
+          updateInfoPanel();
+        }
+    
+        function updateTemperature() {
+          temperature = parseInt(document.getElementById('temperatureSlider').value);
+          document.getElementById('temperatureValue').textContent = `${temperature}°C`;
+          updateInfoPanel();
+        }
+    
+        function updatePressure() {
+          pressure = parseFloat(document.getElementById('pressureSlider').value);
+          document.getElementById('pressureValue').textContent = `${pressure.toFixed(1)} atm`;
+          updateInfoPanel();
+        }
+    
+        function updateObstacles() {
+          obstacleDensity = parseInt(document.getElementById('obstacleSlider').value);
+          document.getElementById('obstacleValue').textContent = `${obstacleDensity}%`;
+          initializeObstacles();
+          updateInfoPanel();
+        }
+    
+        function changeFluidType() {
+          fluidType = document.getElementById('fluidTypeSelect').value;
+          particles.forEach(particle => particle.density = getFluidDensity());
+          updateInfoPanel();
+        }
+    
+        function addVortex(direction) {
+          vortices.push(new Vortex(
+            Math.random() * canvas.width,
+            Math.random() * canvas.height,
+            Math.random() * 5 + 1,
+            direction
+          ));
+        }
+    
+        function updateCompressibility() {
+          compressibility = parseFloat(document.getElementById('compressibilitySlider').value);
+          document.getElementById('compressibilityValue').textContent = compressibility.toFixed(2);
+          updateInfoPanel();
+        }
+    
+        function updateInfoPanel() {
+          document.getElementById('viscosityValue').textContent = `${viscosity} (${getViscosityLabel(viscosity)})`;
+          document.getElementById('flowTypeValue').textContent = flowType.charAt(0).toUpperCase() + flowType.slice(1);
+          document.getElementById('particleCount').textContent = particleCount;
+          calculateReynoldsNumber();
+        }
+    
+        function getViscosityLabel(value) {
+          if (value <= 0.1) return 'Low';
+          if (value <= 0.5) return 'Medium';
+          return 'High';
+        }
+    
+        function calculateReynoldsNumber() {
+          const characteristicLength = canvas.width;
+          const density = pressure * getFluidDensity() / (0.287 * (temperature + 273.15));
+          const reynoldsNumber = (density * averageVelocity * characteristicLength) / viscosity;
+          document.getElementById('reynoldsNumber').textContent = reynoldsNumber.toFixed(2);
+        }
+    
+        function applyVortexForce(particle, vortex) {
+          const dx = particle.x - vortex.x;
+          const dy = particle.y - vortex.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const force = vortex.strength / (distance + 1);
+          if (vortex.direction === 'clockwise') {
+            particle.vx -= force * dy / distance;
+            particle.vy += force * dx / distance;
+          } else {
+            particle.vx += force * dy / distance;
+            particle.vy -= force * dx / distance;
+          }
+        }
+    
+        function update() {
+          if (!isPaused) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+            // Draw obstacles
+            obstacles.forEach(obstacle => {
+              ctx.beginPath();
+              ctx.arc(obstacle.x, obstacle.y, obstacle.radius, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(100, 100, 100, 0.5)';
+              ctx.fill();
+            });
+    
+            let totalVelocity = 0;
+    
+            particles.forEach(particle => {
+              // Apply flow dynamics
+              if (flowType === 'laminar') {
+                particle.vx = (canvas.width / 2 - particle.x) * 0.01;
+                particle.vy = Math.sin(particle.x * 0.02) * 2;
+              } else {
+                particle.vx += (Math.random() - 0.5) * 0.5;
+                particle.vy += (Math.random() - 0.5) * 0.5;
+              }
+    
+              // Apply vortex forces
+              vortices.forEach(vortex => applyVortexForce(particle, vortex));
+    
+              // Apply temperature and pressure effects
+              const tempFactor = 1 + (temperature - 20) / 100;
+              const pressureFactor = pressure;
+              particle.vx *= tempFactor * pressureFactor;
+              particle.vy *= tempFactor * pressureFactor;
+    
+              // Apply viscosity
+              particle.vx *= (1 - viscosity * 0.01);
+              particle.vy *= (1 - viscosity * 0.01);
+    
+              // Apply compressibility
+              const speed = Math.sqrt(particle.vx * particle.vx + particle.vy * particle.vy);
+              const compressionFactor = 1 - compressibility * speed * 0.01;
+              particle.vx *= compressionFactor;
+              particle.vy *= compressionFactor;
+    
+              // Check collision with obstacles
+              obstacles.forEach(obstacle => {
+                const dx = particle.x - obstacle.x;
+                const dy = particle.y - obstacle.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < obstacle.radius + 2) {
+                  const angle = Math.atan2(dy, dx);
+                  particle.x = obstacle.x + (obstacle.radius + 2) * Math.cos(angle);
+                  particle.y = obstacle.y + (obstacle.radius + 2) * Math.sin(angle);
+                  particle.vx = -particle.vx;
+                  particle.vy = -particle.vy;
+                }
+              });
+    
+              // Update position
+              particle.x += particle.vx;
+              particle.y += particle.vy;
+    
+              // Wrap around edges
+              if (particle.x > canvas.width) particle.x = 0;
+              if (particle.x < 0) particle.x = canvas.width;
+              if (particle.y > canvas.height) particle.y = 0;
+              if (particle.y < 0) particle.y = canvas.height;
+    
+              // Calculate total velocity for Reynolds number
+              totalVelocity += Math.sqrt(particle.vx * particle.vx + particle.vy * particle.vy);
+    
+              // Draw particle
+              ctx.beginPath();
+              ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
+              ctx.fillStyle = particle.color;
+              ctx.fill();
+            });
+    
+            // Draw vortices
+            vortices.forEach(vortex => {
+              ctx.beginPath();
+              ctx.arc(vortex.x, vortex.y, vortex.strength * 5, 0, Math.PI * 2);
+              ctx.strokeStyle = vortex.direction === 'clockwise' ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+            });
+    
+            averageVelocity = totalVelocity / particleCount;
+            calculateReynoldsNumber();
+          }
+    
+          requestAnimationFrame(update);
+        }
+    
+        initializeParticles();
+        initializeObstacles();
+        update();
+      </script>
+    </body>
+    </html>
