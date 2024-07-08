@@ -1,4 +1,4 @@
-<html><head><base href="https://www.gnometown.com/" />
+<html><head><base href="https://www.gnometown.com/">
     <title>Gnome Town - Enchanted Forest Colony Simulator</title>
     <style>
       body {
@@ -51,6 +51,24 @@
         background-color: #FF69B4;
         border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
         position: absolute;
+      }
+      .gnome-home {
+        width: 40px;
+        height: 40px;
+        background-color: #8B4513;
+        position: absolute;
+        border-radius: 50% 50% 10% 10% / 60% 60% 40% 40%;
+      }
+      .gnome-home::before {
+        content: '';
+        position: absolute;
+        width: 15px;
+        height: 20px;
+        background-color: #4B2308;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 7px 7px 0 0;
       }
       .controls {
         margin-top: 20px;
@@ -106,43 +124,39 @@
     </head>
     <body>
     <div class="container">
-      <h1>Gnome Town</h1>
-      <p>Your enchanted gnome colony is flourishing in the magical forest!</p>
+      <h1>Welcome to Gnome Town</h1>
+      <p>Build and manage your magical gnome colony in the enchanted forest!</p>
       
       <div class="game-window" id="gameWindow">
-        <div class="gnome" style="left: 454.96px; top: 315.07px;"></div>
-        <div class="gnome" style="left: 67.44px; top: 100.921px;"></div>
-        <div class="gnome" style="left: 507.645px; top: 198.265px;"></div>
-        <div class="tree" style="left: 396.374px; top: 245.319px;"></div>
-        <div class="tree" style="left: 471.375px; top: 194.582px;"></div>
-        <div class="tree" style="left: 128.668px; top: 331.043px;"></div>
-        <div class="mushroom" style="left: 430.714px; top: 134.048px;"></div>
-        <div class="mushroom" style="left: 129.84px; top: 240.364px;"></div>
-        <div class="mushroom" style="left: 312.964px; top: 111.429px;"></div>
-        <div class="mushroom" style="left: 34.2897px; top: 112.714px;"></div>
-        <div class="tree" style="left: 386.597px; top: 34.8227px;"></div>
-        <div class="gnome" style="left: 115.638px; top: 245.358px;"></div>
-        <div class="gnome" style="left: 375.463px; top: 201.531px;"></div>
-        <div class="gnome" style="left: 119.919px; top: 34.7073px;"></div>
+        <!-- Initial game elements -->
+        <div class="gnome" style="left: 100px; top: 200px;"></div>
+        <div class="gnome" style="left: 300px; top: 150px;"></div>
+        <div class="tree" style="left: 50px; top: 100px;"></div>
+        <div class="tree" style="left: 500px; top: 300px;"></div>
+        <div class="mushroom" style="left: 400px; top: 250px;"></div>
+        <div class="gnome-home" style="left: 200px; top: 150px;"></div>
       </div>
       
       <div class="controls">
         <button onclick="addGnome()">Add Gnome</button>
         <button onclick="plantTree()">Plant Tree</button>
         <button onclick="growMushroom()">Grow Mushroom</button>
+        <button onclick="buildHome()">Build Home</button>
         <button onclick="harvestResources()">Harvest Resources</button>
-        <button onclick="castSpell()">Cast Spell</button>
       </div>
       
       <div class="resources">
         <div class="resource">
-          <h3>Gnomes: <span id="gnomeCount">6</span></h3>
+          <h3>Gnomes: <span id="gnomeCount">2</span></h3>
         </div>
         <div class="resource">
-          <h3>Trees: <span id="treeCount">4</span></h3>
+          <h3>Trees: <span id="treeCount">2</span></h3>
         </div>
         <div class="resource">
-          <h3>Mushrooms: <span id="mushroomCount">4</span></h3>
+          <h3>Mushrooms: <span id="mushroomCount">1</span></h3>
+        </div>
+        <div class="resource">
+          <h3>Homes: <span id="homeCount">1</span></h3>
         </div>
         <div class="resource">
           <h3>Magic Dust: <span id="magicDustCount">0</span></h3>
@@ -150,26 +164,31 @@
       </div>
     
       <div class="event-log" id="eventLog">
-        <div class="event">Your gnome colony has grown! The forest is teeming with life and magic...</div>
+        <div class="event">Welcome to Gnome Town! Your magical journey begins...</div>
       </div>
     </div>
     
     <script>
-      let gnomes = 6;
-      let trees = 4;
-      let mushrooms = 4;
+      let gnomes = 2;
+      let trees = 2;
+      let mushrooms = 1;
+      let homes = 1;
       let magicDust = 0;
       
       function addGnome() {
-        gnomes++;
-        updateCounts();
-        const gameWindow = document.getElementById('gameWindow');
-        const gnome = document.createElement('div');
-        gnome.className = 'gnome';
-        gnome.style.left = Math.random() * 580 + 'px';
-        gnome.style.top = Math.random() * 380 + 'px';
-        gameWindow.appendChild(gnome);
-        logEvent("A new gnome has magically appeared in your colony!");
+        if (gnomes < homes * 3) {
+          gnomes++;
+          updateCounts();
+          const gameWindow = document.getElementById('gameWindow');
+          const gnome = document.createElement('div');
+          gnome.className = 'gnome';
+          gnome.style.left = Math.random() * 580 + 'px';
+          gnome.style.top = Math.random() * 380 + 'px';
+          gameWindow.appendChild(gnome);
+          logEvent("A new gnome has joined your colony!");
+        } else {
+          logEvent("Not enough homes for more gnomes. Build more homes first!");
+        }
       }
       
       function plantTree() {
@@ -181,7 +200,7 @@
         tree.style.left = Math.random() * 570 + 'px';
         tree.style.top = Math.random() * 350 + 'px';
         gameWindow.appendChild(tree);
-        logEvent("An enchanted tree has sprouted from the forest floor!");
+        logEvent("A magical tree has sprouted in your forest!");
       }
       
       function growMushroom() {
@@ -193,48 +212,39 @@
         mushroom.style.left = Math.random() * 585 + 'px';
         mushroom.style.top = Math.random() * 385 + 'px';
         gameWindow.appendChild(mushroom);
-        logEvent("A colorful, magical mushroom has popped up in your forest!");
+        logEvent("A whimsical mushroom has popped up!");
+      }
+      
+      function buildHome() {
+        if (magicDust >= 10 && trees >= 2) {
+          homes++;
+          magicDust -= 10;
+          trees -= 2;
+          updateCounts();
+          const gameWindow = document.getElementById('gameWindow');
+          const home = document.createElement('div');
+          home.className = 'gnome-home';
+          home.style.left = Math.random() * 560 + 'px';
+          home.style.top = Math.random() * 360 + 'px';
+          gameWindow.appendChild(home);
+          logEvent("A cozy new gnome home has been built!");
+        } else {
+          logEvent("Not enough resources to build a home. You need 10 magic dust and 2 trees.");
+        }
       }
       
       function harvestResources() {
         const harvestedDust = Math.floor(Math.random() * (gnomes + trees + mushrooms)) + 1;
         magicDust += harvestedDust;
         updateCounts();
-        logEvent(`Your industrious gnomes harvested ${harvestedDust} units of shimmering magic dust!`);
-      }
-    
-      function castSpell() {
-        if (magicDust >= 10) {
-          magicDust -= 10;
-          const spellEffect = Math.floor(Math.random() * 3);
-          switch(spellEffect) {
-            case 0:
-              addGnome();
-              addGnome();
-              logEvent("A powerful spell conjures two new gnomes into existence!");
-              break;
-            case 1:
-              plantTree();
-              plantTree();
-              logEvent("Your magic causes two mystical trees to instantly grow!");
-              break;
-            case 2:
-              growMushroom();
-              growMushroom();
-              growMushroom();
-              logEvent("A surge of magic sprouts three vibrant mushrooms!");
-              break;
-          }
-          updateCounts();
-        } else {
-          logEvent("Not enough magic dust to cast a spell! Keep harvesting...");
-        }
+        logEvent(`Your gnomes harvested ${harvestedDust} units of magic dust!`);
       }
       
       function updateCounts() {
         document.getElementById('gnomeCount').textContent = gnomes;
         document.getElementById('treeCount').textContent = trees;
         document.getElementById('mushroomCount').textContent = mushrooms;
+        document.getElementById('homeCount').textContent = homes;
         document.getElementById('magicDustCount').textContent = magicDust;
       }
     
