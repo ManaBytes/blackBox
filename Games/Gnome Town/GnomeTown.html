@@ -70,6 +70,18 @@
         transform: translateX(-50%);
         border-radius: 7px 7px 0 0;
       }
+      .goblin {
+        width: 25px;
+        height: 25px;
+        background-color: #4CAF50;
+        position: absolute;
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        animation: wobble 0.5s ease-in-out infinite alternate;
+      }
+      @keyframes wobble {
+        from { transform: rotate(-5deg); }
+        to { transform: rotate(5deg); }
+      }
       .controls {
         margin-top: 20px;
       }
@@ -125,7 +137,7 @@
     <body>
     <div class="container">
       <h1>Welcome to Gnome Town</h1>
-      <p>Build and manage your magical gnome colony in the enchanted forest!</p>
+      <p>Build, manage, and defend your magical gnome colony in the enchanted forest!</p>
       
       <div class="game-window" id="gameWindow">
         <!-- Initial game elements -->
@@ -143,6 +155,7 @@
         <button onclick="growMushroom()">Grow Mushroom</button>
         <button onclick="buildHome()">Build Home</button>
         <button onclick="harvestResources()">Harvest Resources</button>
+        <button onclick="trainGnomes()">Train Gnomes</button>
       </div>
       
       <div class="resources">
@@ -161,6 +174,9 @@
         <div class="resource">
           <h3>Magic Dust: <span id="magicDustCount">0</span></h3>
         </div>
+        <div class="resource">
+          <h3>Goblins: <span id="goblinCount">0</span></h3>
+        </div>
       </div>
     
       <div class="event-log" id="eventLog">
@@ -174,6 +190,8 @@
       let mushrooms = 1;
       let homes = 1;
       let magicDust = 0;
+      let goblins = 0;
+      let gnomeStrength = 1;
       
       function addGnome() {
         if (gnomes < homes * 3) {
@@ -239,6 +257,50 @@
         updateCounts();
         logEvent(`Your gnomes harvested ${harvestedDust} units of magic dust!`);
       }
+    
+      function trainGnomes() {
+        if (magicDust >= 5) {
+          magicDust -= 5;
+          gnomeStrength++;
+          updateCounts();
+          logEvent(`Your gnomes have trained and become stronger! Current strength: ${gnomeStrength}`);
+        } else {
+          logEvent("Not enough magic dust to train gnomes. You need 5 magic dust.");
+        }
+      }
+    
+      function spawnGoblin() {
+        goblins++;
+        updateCounts();
+        const gameWindow = document.getElementById('gameWindow');
+        const goblin = document.createElement('div');
+        goblin.className = 'goblin';
+        goblin.style.left = Math.random() * 575 + 'px';
+        goblin.style.top = Math.random() * 375 + 'px';
+        gameWindow.appendChild(goblin);
+        logEvent("A mischievous goblin has appeared in the forest!");
+      }
+    
+      function fightGoblins() {
+        if (goblins > 0) {
+          const gnomePower = gnomes * gnomeStrength;
+          const goblinDefeated = Math.min(goblins, Math.floor(gnomePower / 2));
+          goblins -= goblinDefeated;
+          updateCounts();
+          removeGoblins(goblinDefeated);
+          logEvent(`Your brave gnomes defeated ${goblinDefeated} goblins!`);
+          if (goblinDefeated === 0) {
+            logEvent("The gnomes weren't strong enough. Train them to become stronger!");
+          }
+        }
+      }
+    
+      function removeGoblins(count) {
+        const goblinsToRemove = document.querySelectorAll('.goblin');
+        for (let i = 0; i < count && i < goblinsToRemove.length; i++) {
+          goblinsToRemove[i].remove();
+        }
+      }
       
       function updateCounts() {
         document.getElementById('gnomeCount').textContent = gnomes;
@@ -246,6 +308,7 @@
         document.getElementById('mushroomCount').textContent = mushrooms;
         document.getElementById('homeCount').textContent = homes;
         document.getElementById('magicDustCount').textContent = magicDust;
+        document.getElementById('goblinCount').textContent = goblins;
       }
     
       function logEvent(message) {
@@ -269,6 +332,18 @@
           gnome.style.top = newY + 'px';
         });
       }, 2000);
+    
+      // Goblin spawning
+      setInterval(() => {
+        if (Math.random() < 0.3) {  // 30% chance every 5 seconds
+          spawnGoblin();
+        }
+      }, 5000);
+    
+      // Automatic goblin fighting
+      setInterval(() => {
+        fightGoblins();
+      }, 3000);
     
       updateCounts();
     </script>
