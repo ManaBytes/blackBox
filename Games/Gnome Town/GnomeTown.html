@@ -82,6 +82,13 @@
         from { transform: rotate(-5deg); }
         to { transform: rotate(5deg); }
       }
+      .plank {
+        width: 30px;
+        height: 10px;
+        background-color: #D2691E;
+        position: absolute;
+        border-radius: 2px;
+      }
       .controls {
         margin-top: 20px;
       }
@@ -102,11 +109,13 @@
       .resources {
         display: flex;
         justify-content: space-around;
+        flex-wrap: wrap;
         margin-top: 20px;
       }
       .resource {
         background-color: rgba(0,0,0,0.4);
         padding: 10px;
+        margin: 5px;
         border-radius: 5px;
         transition: transform 0.3s;
       }
@@ -156,6 +165,7 @@
         <button onclick="buildHome()">Build Home</button>
         <button onclick="harvestResources()">Harvest Resources</button>
         <button onclick="trainGnomes()">Train Gnomes</button>
+        <button onclick="harvestTree()">Harvest Tree</button>
       </div>
       
       <div class="resources">
@@ -177,6 +187,9 @@
         <div class="resource">
           <h3>Goblins: <span id="goblinCount">0</span></h3>
         </div>
+        <div class="resource">
+          <h3>Planks: <span id="plankCount">0</span></h3>
+        </div>
       </div>
     
       <div class="event-log" id="eventLog">
@@ -192,6 +205,7 @@
       let magicDust = 0;
       let goblins = 0;
       let gnomeStrength = 1;
+      let planks = 0;
       
       function addGnome() {
         if (gnomes < homes * 3) {
@@ -234,10 +248,10 @@
       }
       
       function buildHome() {
-        if (magicDust >= 10 && trees >= 2) {
+        if (planks >= 5 && magicDust >= 5) {
           homes++;
-          magicDust -= 10;
-          trees -= 2;
+          planks -= 5;
+          magicDust -= 5;
           updateCounts();
           const gameWindow = document.getElementById('gameWindow');
           const home = document.createElement('div');
@@ -247,7 +261,7 @@
           gameWindow.appendChild(home);
           logEvent("A cozy new gnome home has been built!");
         } else {
-          logEvent("Not enough resources to build a home. You need 10 magic dust and 2 trees.");
+          logEvent("Not enough resources to build a home. You need 5 planks and 5 magic dust.");
         }
       }
       
@@ -301,6 +315,38 @@
           goblinsToRemove[i].remove();
         }
       }
+    
+      function harvestTree() {
+        if (trees > 0) {
+          trees--;
+          const harvestedPlanks = Math.floor(Math.random() * 3) + 1;
+          planks += harvestedPlanks;
+          updateCounts();
+          removeTree();
+          logEvent(`Your gnomes harvested a tree and got ${harvestedPlanks} planks!`);
+          addPlanks(harvestedPlanks);
+        } else {
+          logEvent("No trees to harvest. Plant more trees!");
+        }
+      }
+    
+      function removeTree() {
+        const treesToRemove = document.querySelectorAll('.tree');
+        if (treesToRemove.length > 0) {
+          treesToRemove[0].remove();
+        }
+      }
+    
+      function addPlanks(count) {
+        const gameWindow = document.getElementById('gameWindow');
+        for (let i = 0; i < count; i++) {
+          const plank = document.createElement('div');
+          plank.className = 'plank';
+          plank.style.left = Math.random() * 570 + 'px';
+          plank.style.top = Math.random() * 390 + 'px';
+          gameWindow.appendChild(plank);
+        }
+      }
       
       function updateCounts() {
         document.getElementById('gnomeCount').textContent = gnomes;
@@ -309,6 +355,7 @@
         document.getElementById('homeCount').textContent = homes;
         document.getElementById('magicDustCount').textContent = magicDust;
         document.getElementById('goblinCount').textContent = goblins;
+        document.getElementById('plankCount').textContent = planks;
       }
     
       function logEvent(message) {
