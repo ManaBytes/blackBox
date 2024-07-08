@@ -1,4 +1,4 @@
-<html><head><base href="https://www.gnometown.com/">
+<html><head><base href="https://graeycowl.github.io/">
     <title>Gnome Town - Enchanted Forest Colony Simulator</title>
     <style>
       body {
@@ -141,6 +141,33 @@
           opacity: 1;
         }
       }
+/* Tooltip container */
+      .tooltip {
+        position: relative;
+        display: inline-block;
+        border-bottom: 1px dotted rgba(0,0,0,0.4);
+      }
+/* Tooltip text */
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+             padding: 5px 0;
+            border-radius: 6px;
+ 
+  /* Position the tooltip text - see examples below! */
+        position: absolute;
+        z-index: 1;
+        top: 100%;
+        left: 50%;
+        margin-left: -60px;
+        }
+/* Show the tooltip text when you mouse over the tooltip container */
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+        }
     </style>
     </head>
     <body>
@@ -396,12 +423,17 @@
     </script>
     
     <footer>
-      <p>© 2023 Gnome Town. All rights reserved.</p>
+      <p>© 2024 Gnome Town. All rights reserved.</p>
       <p>
-        <a href="https://www.gnometown.com/about">About</a> | 
-        <a href="https://www.gnometown.com/faq">FAQ</a> | 
-        <a href="https://www.gnometown.com/community">Community</a> |
-        <a href="https://www.gnometown.com/enchanted-shop">Enchanted Shop</a>
+        <div class="tooltip">Work in Prog
+            <span class="tooltiptext">Return spell, scaling, plank visual bug, hunger, content</span>
+          </div> |
+        <a class="tooltip" href="https://graeycowl.github.io/">Home
+            <span class="tooltiptext">Take me drunk I'm home</span></a> |
+        <a class="tooltip" href="https://graeycowl.github.io/blackBox">Black Box
+            <span class="tooltiptext">What's in the box</span></a> |
+        <a class="tooltip" href="https://graeycowl.github.io/blackBox/Games/">Game
+            <span class="tooltiptext">Game select screen</span></a> |
       </p>
     </footer>
     
