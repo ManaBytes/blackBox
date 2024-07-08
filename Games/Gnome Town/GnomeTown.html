@@ -280,6 +280,7 @@
           planks -= 5;
           magicDust -= 5;
           updateCounts();
+          removePlank();
           const gameWindow = document.getElementById('gameWindow');
           const home = document.createElement('div');
           home.className = 'gnome-home';
@@ -289,6 +290,13 @@
           logEvent("A cozy new gnome home has been built!");
         } else {
           logEvent("Not enough resources to build a home. You need 5 planks and 5 magic dust.");
+        }
+      }
+
+      function removePlank() {
+        const planksToRemove = document.querySelectorAll('.plank');
+        if (planksToRemove.length > 0) {
+          planksToRemove[0].remove();
         }
       }
       
