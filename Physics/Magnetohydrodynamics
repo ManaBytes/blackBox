@@ -1,0 +1,279 @@
+<html><head><base href="https://graeycowl.github.io/">
+<title>Magnetohydrodynamics Simulator - WebSim</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #0a0a2a;
+    color: #e0e0ff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  header {
+    background-color: #1a1a4a;
+    color: #00ffff;
+    text-align: center;
+    padding: 1em;
+    box-shadow: 0 2px 4px rgba(0,255,255,0.1);
+  }
+  main {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2em;
+  }
+  .simulator {
+    background-color: #1a1a4a;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,255,255,0.2);
+    padding: 2em;
+    text-align: center;
+    max-width: 800px;
+    width: 100%;
+  }
+  #mhdCanvas {
+    border: 1px solid #00ffff;
+    background-color: #0a0a2a;
+  }
+  .controls {
+    margin-top: 1em;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  button, select {
+    background-color: #00ffff;
+    color: #0a0a2a;
+    border: none;
+    padding: 0.5em 1em;
+    margin: 0.5em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  button:hover, select:hover {
+    background-color: #00cccc;
+  }
+  .info-panel {
+    background-color: #2a2a6a;
+    border: 1px solid #00ffff;
+    border-radius: 5px;
+    padding: 1em;
+    margin-top: 1em;
+    text-align: left;
+  }
+  .info-panel h3 {
+    margin-top: 0;
+    color: #00ffff;
+  }
+  .parameter-display {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5em;
+  }
+  .parameter-name {
+    font-weight: bold;
+  }
+  footer {
+    background-color: #1a1a4a;
+    color: #e0e0ff;
+    text-align: center;
+    padding: 1em;
+    margin-top: auto;
+  }
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 1em;
+    margin-top: 0.5em;
+  }
+  .footer-links a {
+    color: #00ffff;
+    text-decoration: none;
+  }
+  .footer-links a:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Magnetohydrodynamics Simulator</h1>
+  </header>
+  
+  <main>
+    <div class="simulator">
+      <canvas id="mhdCanvas" width="600" height="400"></canvas>
+      <div class="controls">
+        <button onclick="resetSimulation()">Reset</button>
+        <button onclick="togglePause()">Pause/Resume</button>
+        <select id="conductivitySelect" onchange="changeConductivity()">
+          <option value="low">Low Conductivity</option>
+          <option value="medium" selected>Medium Conductivity</option>
+          <option value="high">High Conductivity</option>
+        </select>
+        <select id="magneticFieldSelect" onchange="changeMagneticField()">
+          <option value="weak">Weak Magnetic Field</option>
+          <option value="moderate" selected>Moderate Magnetic Field</option>
+          <option value="strong">Strong Magnetic Field</option>
+        </select>
+      </div>
+      <div class="info-panel">
+        <h3>Simulation Parameters</h3>
+        <div class="parameter-display">
+          <span class="parameter-name">Conductivity:</span>
+          <span id="conductivityValue">Medium</span>
+        </div>
+        <div class="parameter-display">
+          <span class="parameter-name">Magnetic Field Strength:</span>
+          <span id="magneticFieldValue">Moderate</span>
+        </div>
+        <div class="parameter-display">
+          <span class="parameter-name">Particle Count:</span>
+          <span id="particleCount">1000</span>
+        </div>
+        <div class="parameter-display">
+          <span class="parameter-name">Magnetic Reynolds Number:</span>
+          <span id="magneticReynoldsNumber">Calculating...</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Explore the fascinating interplay between magnetic fields and conductive fluids!</p>
+    <div class="footer-links">
+      <a href="https://websim.ai/c/plasma-physics">Plasma Physics Simulator</a>
+      <a href="https://websim.ai/c/solar-dynamo">Solar Dynamo Simulator</a>
+      <a href="https://websim.ai/c/fusion-reactor">Fusion Reactor Simulator</a>
+    </div>
+  </footer>
+
+  <script>
+    const canvas = document.getElementById('mhdCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let isPaused = false;
+    let conductivity = 'medium';
+    let magneticFieldStrength = 'moderate';
+    const particleCount = 1000;
+    let averageVelocity = 0;
+
+    function Particle(x, y) {
+      this.x = x;
+      this.y = y;
+      this.vx = (Math.random() - 0.5) * 2;
+      this.vy = (Math.random() - 0.5) * 2;
+      this.charge = Math.random() < 0.5 ? -1 : 1;
+      this.color = this.charge === -1 ? '#ff00ff' : '#00ffff';
+    }
+
+    function initializeParticles() {
+      particles = [];
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle(Math.random() * canvas.width, Math.random() * canvas.height));
+      }
+      updateInfoPanel();
+    }
+
+    function resetSimulation() {
+      initializeParticles();
+    }
+
+    function togglePause() {
+      isPaused = !isPaused;
+    }
+
+    function changeConductivity() {
+      conductivity = document.getElementById('conductivitySelect').value;
+      updateInfoPanel();
+    }
+
+    function changeMagneticField() {
+      magneticFieldStrength = document.getElementById('magneticFieldSelect').value;
+      updateInfoPanel();
+    }
+
+    function updateInfoPanel() {
+      document.getElementById('conductivityValue').textContent = conductivity.charAt(0).toUpperCase() + conductivity.slice(1);
+      document.getElementById('magneticFieldValue').textContent = magneticFieldStrength.charAt(0).toUpperCase() + magneticFieldStrength.slice(1);
+      document.getElementById('particleCount').textContent = particleCount;
+      calculateMagneticReynoldsNumber();
+    }
+
+    function calculateMagneticReynoldsNumber() {
+      // This is a simplified calculation for demonstration purposes
+      const conductivityFactor = {'low': 0.1, 'medium': 1, 'high': 10}[conductivity];
+      const magneticFieldFactor = {'weak': 0.1, 'moderate': 1, 'strong': 10}[magneticFieldStrength];
+      const characteristicLength = canvas.width;
+      const magneticReynoldsNumber = conductivityFactor * magneticFieldFactor * averageVelocity * characteristicLength;
+      document.getElementById('magneticReynoldsNumber').textContent = magneticReynoldsNumber.toFixed(2);
+    }
+
+    function applyLorentzForce(particle) {
+      const magneticFieldFactor = {'weak': 0.1, 'moderate': 0.5, 'strong': 1}[magneticFieldStrength];
+      const force = magneticFieldFactor * particle.charge;
+      particle.vx += force * particle.vy;
+      particle.vy -= force * particle.vx;
+    }
+
+    function update() {
+      if (!isPaused) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw magnetic field lines
+        const lineSpacing = 40;
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.2)';
+        ctx.lineWidth = 1;
+        for (let y = 0; y < canvas.height; y += lineSpacing) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(canvas.width, y);
+          ctx.stroke();
+        }
+
+        let totalVelocity = 0;
+
+        particles.forEach(particle => {
+          applyLorentzForce(particle);
+
+          // Apply conductivity effects
+          const conductivityFactor = {'low': 0.99, 'medium': 0.995, 'high': 0.999}[conductivity];
+          particle.vx *= conductivityFactor;
+          particle.vy *= conductivityFactor;
+
+          // Update position
+          particle.x += particle.vx;
+          particle.y += particle.vy;
+
+          // Wrap around edges
+          if (particle.x > canvas.width) particle.x = 0;
+          if (particle.x < 0) particle.x = canvas.width;
+          if (particle.y > canvas.height) particle.y = 0;
+          if (particle.y < 0) particle.y = canvas.height;
+
+          // Calculate total velocity for Magnetic Reynolds number
+          totalVelocity += Math.sqrt(particle.vx * particle.vx + particle.vy * particle.vy);
+
+          // Draw particle
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = particle.color;
+          ctx.fill();
+        });
+
+        averageVelocity = totalVelocity / particleCount;
+        calculateMagneticReynoldsNumber();
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    initializeParticles();
+    update();
+  </script>
+</body>
+</html>
