@@ -1,5 +1,5 @@
 <html><head><base href="https://graeycowl.github.io/">
-<title>Magnetohydrodynamics Simulator - WebSim</title>
+<title>Magnetohydrodynamics Simulator - Advanced Mode</title>
 <style>
   body {
     font-family: 'Arial', sans-serif;
@@ -77,6 +77,29 @@
   .parameter-name {
     font-weight: bold;
   }
+  #advancedControls {
+    margin-top: 1em;
+    border-top: 1px solid #00ffff;
+    padding-top: 1em;
+  }
+  .slider-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5em;
+  }
+  .slider-container label {
+    flex: 1;
+    margin-right: 1em;
+  }
+  .slider-value {
+    min-width: 3em;
+    text-align: right;
+    color: #00ffff;
+  }
+  input[type="range"] {
+    width: 50%;
+    margin: 0 1em;
+  }
   footer {
     background-color: #1a1a4a;
     color: #e0e0ff;
@@ -101,7 +124,7 @@
 </head>
 <body>
   <header>
-    <h1>Magnetohydrodynamics Simulator</h1>
+    <h1>Magnetohydrodynamics Simulator - Advanced Mode</h1>
   </header>
   
   <main>
@@ -112,24 +135,24 @@
         <button onclick="togglePause()">Pause/Resume</button>
         <select id="conductivitySelect" onchange="changeConductivity()">
           <option value="low">Low Conductivity</option>
-          <option value="medium" selected>Medium Conductivity</option>
-          <option value="high">High Conductivity</option>
+          <option value="medium">Medium Conductivity</option>
+          <option value="high" selected>High Conductivity</option>
         </select>
         <select id="magneticFieldSelect" onchange="changeMagneticField()">
           <option value="weak">Weak Magnetic Field</option>
-          <option value="moderate" selected>Moderate Magnetic Field</option>
-          <option value="strong">Strong Magnetic Field</option>
+          <option value="moderate">Moderate Magnetic Field</option>
+          <option value="strong" selected>Strong Magnetic Field</option>
         </select>
       </div>
       <div class="info-panel">
         <h3>Simulation Parameters</h3>
         <div class="parameter-display">
           <span class="parameter-name">Conductivity:</span>
-          <span id="conductivityValue">Medium</span>
+          <span id="conductivityValue">High</span>
         </div>
         <div class="parameter-display">
           <span class="parameter-name">Magnetic Field Strength:</span>
-          <span id="magneticFieldValue">Moderate</span>
+          <span id="magneticFieldValue">Strong</span>
         </div>
         <div class="parameter-display">
           <span class="parameter-name">Particle Count:</span>
@@ -137,18 +160,36 @@
         </div>
         <div class="parameter-display">
           <span class="parameter-name">Magnetic Reynolds Number:</span>
-          <span id="magneticReynoldsNumber">Calculating...</span>
+          <span id="magneticReynoldsNumber">0.16</span>
+        </div>
+      </div>
+      <div id="advancedControls">
+        <h3>Advanced Controls</h3>
+        <div class="slider-container">
+          <label for="temperatureSlider">Temperature:</label>
+          <input type="range" id="temperatureSlider" min="0" max="10000" value="5000" step="100" onchange="updateTemperature()">
+          <span id="temperatureValue" class="slider-value">5000 K</span>
+        </div>
+        <div class="slider-container">
+          <label for="densitySlider">Plasma Density:</label>
+          <input type="range" id="densitySlider" min="1" max="100" value="50" onchange="updateDensity()">
+          <span id="densityValue" class="slider-value">50 kg/m³</span>
+        </div>
+        <div class="slider-container">
+          <label for="hallEffectSlider">Hall Effect Strength:</label>
+          <input type="range" id="hallEffectSlider" min="0" max="1" value="0.5" step="0.1" onchange="updateHallEffect()">
+          <span id="hallEffectValue" class="slider-value">0.5</span>
         </div>
       </div>
     </div>
   </main>
 
   <footer>
-    <p>Explore the fascinating interplay between magnetic fields and conductive fluids!</p>
+    <p>Explore advanced magnetohydrodynamics concepts with this interactive simulation!</p>
     <div class="footer-links">
-      <a href="https://websim.ai/c/plasma-physics">Plasma Physics Simulator</a>
-      <a href="https://websim.ai/c/solar-dynamo">Solar Dynamo Simulator</a>
-      <a href="https://websim.ai/c/fusion-reactor">Fusion Reactor Simulator</a>
+      <a href="https://websim.ai/c/plasma-instabilities">Plasma Instabilities Simulator</a>
+      <a href="https://websim.ai/c/mhd-turbulence">MHD Turbulence Analyzer</a>
+      <a href="https://websim.ai/c/astrophysical-jets">Astrophysical Jets Simulator</a>
     </div>
   </footer>
 
@@ -157,10 +198,13 @@
     const ctx = canvas.getContext('2d');
     let particles = [];
     let isPaused = false;
-    let conductivity = 'medium';
-    let magneticFieldStrength = 'moderate';
+    let conductivity = 'high';
+    let magneticFieldStrength = 'strong';
     const particleCount = 1000;
     let averageVelocity = 0;
+    let temperature = 5000;
+    let plasmaDensity = 50;
+    let hallEffectStrength = 0.5;
 
     function Particle(x, y) {
       this.x = x;
@@ -197,6 +241,24 @@
       updateInfoPanel();
     }
 
+    function updateTemperature() {
+      temperature = parseInt(document.getElementById('temperatureSlider').value);
+      document.getElementById('temperatureValue').textContent = `${temperature} K`;
+      updateInfoPanel();
+    }
+
+    function updateDensity() {
+      plasmaDensity = parseInt(document.getElementById('densitySlider').value);
+      document.getElementById('densityValue').textContent = `${plasmaDensity} kg/m³`;
+      updateInfoPanel();
+    }
+
+    function updateHallEffect() {
+      hallEffectStrength = parseFloat(document.getElementById('hallEffectSlider').value);
+      document.getElementById('hallEffectValue').textContent = hallEffectStrength.toFixed(1);
+      updateInfoPanel();
+    }
+
     function updateInfoPanel() {
       document.getElementById('conductivityValue').textContent = conductivity.charAt(0).toUpperCase() + conductivity.slice(1);
       document.getElementById('magneticFieldValue').textContent = magneticFieldStrength.charAt(0).toUpperCase() + magneticFieldStrength.slice(1);
@@ -205,11 +267,12 @@
     }
 
     function calculateMagneticReynoldsNumber() {
-      // This is a simplified calculation for demonstration purposes
       const conductivityFactor = {'low': 0.1, 'medium': 1, 'high': 10}[conductivity];
       const magneticFieldFactor = {'weak': 0.1, 'moderate': 1, 'strong': 10}[magneticFieldStrength];
       const characteristicLength = canvas.width;
-      const magneticReynoldsNumber = conductivityFactor * magneticFieldFactor * averageVelocity * characteristicLength;
+      const temperatureFactor = temperature / 5000;
+      const densityFactor = plasmaDensity / 50;
+      const magneticReynoldsNumber = conductivityFactor * magneticFieldFactor * averageVelocity * characteristicLength * temperatureFactor * densityFactor;
       document.getElementById('magneticReynoldsNumber').textContent = magneticReynoldsNumber.toFixed(2);
     }
 
@@ -218,6 +281,11 @@
       const force = magneticFieldFactor * particle.charge;
       particle.vx += force * particle.vy;
       particle.vy -= force * particle.vx;
+
+      // Apply Hall effect
+      const hallForce = hallEffectStrength * magneticFieldFactor * particle.charge;
+      particle.vx += hallForce * particle.vy;
+      particle.vy -= hallForce * particle.vx;
     }
 
     function update() {
@@ -244,6 +312,16 @@
           const conductivityFactor = {'low': 0.99, 'medium': 0.995, 'high': 0.999}[conductivity];
           particle.vx *= conductivityFactor;
           particle.vy *= conductivityFactor;
+
+          // Apply temperature effects
+          const tempFactor = 1 + (temperature - 5000) / 10000;
+          particle.vx *= tempFactor;
+          particle.vy *= tempFactor;
+
+          // Apply density effects
+          const densityFactor = 1 - (plasmaDensity - 50) / 100;
+          particle.vx *= densityFactor;
+          particle.vy *= densityFactor;
 
           // Update position
           particle.x += particle.vx;
