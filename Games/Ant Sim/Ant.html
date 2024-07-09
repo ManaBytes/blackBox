@@ -1,5 +1,5 @@
 <html><head><base href="https://graeycowl.github.io/">
-    <title>Ant Colony Simulation with Ants on Top and More Food</title>
+    <title>Ant Colony Simulation with Color-Coded Ants</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
     <style>
     html, body {
@@ -21,7 +21,7 @@
     const antSpeed = 2;
     const passivePheromoneStrength = 5;
     const activePheromoneStrength = 100;
-    const foodClusters = 10;  // Increased food clusters
+    const foodClusters = 10;
     const foodsPerCluster = 10;
     
     let ants = [];
@@ -172,7 +172,13 @@
         push();
         translate(this.pos.x, this.pos.y);
         rotate(this.vel.heading());
-        fill(this.hasFood ? 255 : 0);
+        if (this.hasFood) {
+          fill(0);  // Black color for ants carrying food
+          stroke(0, 255, 0);  // Green outline for ants carrying food
+        } else {
+          fill(0);  // Black color for ants not carrying food
+          noStroke();
+        }
         ellipse(0, 0, 5, 10);
         pop();
       }
@@ -200,20 +206,23 @@
     </body>
     </html>
     
-    Here are the changes made to keep the ants on the top drawn layer and increase the number of food clusters:
+    Here are the changes made to visually distinguish ants carrying food with a black fill and green outline:
     
-    1. Changed the order of drawing in the `draw()` function:
-       - The pheromones are now drawn before the ants.
-       - This means that the ants will always be drawn on top of the pheromones and other elements, keeping them visible even when they are on top of the nest or food.
+    1. In the `draw()` method of the `Ant` class:
+       - Added a condition to check if the ant is carrying food (`this.hasFood`).
+       - If the ant is carrying food:
+         - Set the fill color to black using `fill(0)`.
+         - Set the stroke color to green using `stroke(0, 255, 0)`.
+       - If the ant is not carrying food:
+         - Set the fill color to black using `fill(0)`.
+         - Remove the stroke using `noStroke()`.
     
-    2. Increased the value of `foodClusters` from 5 to 10:
-       - This will double the number of food clusters that are initially spawned when the simulation starts.
-       - With more food clusters, the ants will have more options to explore and exploit, leading to more complex foraging patterns.
+    Now, ants that are carrying food back to the nest will be filled with black color and have a green outline. This makes them visually distinct from ants that are not carrying food, which will be filled with black color but have no outline.
     
-    By drawing the ants after the pheromones, nest, and food, we ensure that the ants are always fully visible. They will no longer visually disappear when they are on top of other elements.
+    The green outline on the food-carrying ants serves as a clear visual cue that they have successfully found a food source and are bringing it back to the colony. This can help you track the progress of the foraging process and identify the ants that are actively contributing to the colony's food supply.
     
-    Increasing the number of food clusters will provide the ants with a richer environment to navigate. With more food sources scattered around the canvas, the ants will have to make more decisions about which trails to follow and which sources to exploit. This can lead to the emergence of more complex collective behavior.
+    Meanwhile, the black fill color for all ants ensures that they remain visible against the white background and the blue pheromone trails.
     
-    Observe how the increased food availability affects the foraging patterns of the ant colony. You might see more branching and merging of trails as ants discover and communicate about the various food sources.
+    These visual enhancements should make it easier to observe and understand the behavior of individual ants within the colony. You can clearly see which ants are exploring for food (black with no outline) and which ants are exploiting food sources and bringing them back to the nest (black with green outline).
     
-    Feel free to adjust the `foodClusters` value even further to see how the colony responds to different levels of resource abundance!
+    Feel free to experiment with different color schemes or visual styles to represent the ants' states in a way that is most intuitive and informative for you!
