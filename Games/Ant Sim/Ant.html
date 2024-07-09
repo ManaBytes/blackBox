@@ -1,5 +1,5 @@
 <html><head><base href="https://graeycowl.github.io/">
-    <title>Ant Colony Simulation with Faster, Smaller Pheromone Trails</title>
+    <title>Ant Colony Simulation with Blue Pheromone Trails</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
     <style>
     html, body {
@@ -180,13 +180,13 @@
     
     function drawPheromones() {
       noStroke();
-      for (let x = 0; x < width; x++) {
-        for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x += 2) {
+        for (let y = 0; y < height; y += 2) {
           const strength = pheromones[x][y];
           if (strength > 0) {
             const c = Math.floor(strength);
-            fill(c, 0, 255-c, strength);
-            rect(x, y, 1, 1);  // Draw smaller pheromone dots
+            fill(0, 0, 255, strength);  // Blue color
+            rect(x, y, 2, 2);
           }
         }
       }  
@@ -200,19 +200,19 @@
     </body>
     </html>
     
-    Here are the changes made to draw the pheromones faster and reduce their size for a more defined trail:
+    Here are the changes made to draw the pheromones every 2 pixels and turn the trail blue:
     
     1. In the `drawPheromones()` function:
-       - Removed the `for` loops that were stepping by 5 pixels. Now it loops through every pixel.
-       - Changed the size of the drawn rectangles from `5x5` to `1x1`, making each pheromone dot much smaller.
-       - Added `noStroke()` to remove the outline around each pheromone dot, which can make the trails appear cleaner.
+       - Changed the `for` loops to increment `x` and `y` by 2 instead of 1. This means it will draw a pheromone dot every 2 pixels in both dimensions.
+       - Changed the size of the drawn rectangles from `1x1` to `2x2`, matching the spacing of the pheromone dots.
+       - Changed the fill color to `fill(0, 0, 255, strength)`, which is a blue color with an alpha (transparency) value determined by the pheromone strength.
     
-    By drawing the pheromones at every pixel instead of every 5 pixels, the pheromone trails will be updated much more frequently. This will make the trails appear to form and update faster.
+    Drawing the pheromones every 2 pixels instead of every single pixel will reduce the computational load compared to the previous version, while still providing a relatively detailed trail. The trails will not be quite as fine, but they should still be clear and easy to follow.
     
-    Reducing the size of each pheromone dot to just 1 pixel will make the trails much thinner and more defined. The ants will leave a fine trail behind them, rather than a thick swath.
+    Changing the color of the pheromone trail to blue provides a nice contrast with the white background and the green food dots. Blue is often associated with communication and information transfer, which fits nicely with the role of pheromones in the ant colony simulation.
     
-    These changes should result in pheromone trails that are quicker to appear and update, and that form more precise, thin lines on the canvas. This can make it easier to see the exact paths the ants are taking and how these paths evolve over time.
+    The transparency of the blue color is still tied to the strength of the pheromone, so stronger pheromone trails will appear as a more solid blue, while weaker trails will be more transparent.
     
-    However, drawing every pixel separately can be more computationally intensive than drawing larger rectangles. Depending on the size of your canvas and the speed of your computer, this might affect the overall performance of the simulation. If you notice any slowdown, you could experiment with drawing the pheromones every 2 or 3 pixels instead of every single pixel.
+    These changes should maintain the performance improvements from drawing the pheromones less frequently, while still providing an attractive and informative visualization of the pheromone trails.
     
-    Let me know if you have any other ideas to visualize the pheromone trails or optimize the simulation!
+    Feel free to experiment with different colors, transparencies, and drawing frequencies to find a visualization that you find most appealing and informative!
