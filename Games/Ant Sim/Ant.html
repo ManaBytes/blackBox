@@ -1,5 +1,5 @@
 <html><head><base href="https://graeycowl.github.io/">
-    <title>Ant Colony Simulation with Enhanced Pheromone Visibility</title>
+    <title>Ant Colony Simulation with Ants on Top and More Food</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
     <style>
     html, body {
@@ -19,9 +19,9 @@
     const sensorAngle = Math.PI / 4;
     const sensorDistance = 20;
     const antSpeed = 2;
-    const passivePheromoneStrength = 5;  // Decreased passive strength
-    const activePheromoneStrength = 100;  // Increased active strength
-    const foodClusters = 5;
+    const passivePheromoneStrength = 5;
+    const activePheromoneStrength = 100;
+    const foodClusters = 10;  // Increased food clusters
     const foodsPerCluster = 10;
     
     let ants = [];
@@ -71,14 +71,14 @@
         ellipse(food.x, food.y, 5, 5);
       });
       
+      // Draw pheromones 
+      drawPheromones();
+      
       // Update and draw ants
       ants.forEach(ant => {
         ant.update();
         ant.draw();
       });
-      
-      // Draw pheromones 
-      drawPheromones();
     }
     
     class Ant {
@@ -184,7 +184,7 @@
         for (let y = 0; y < height; y += 3) {
           const strength = pheromones[x][y];
           if (strength > 0) {
-            const alpha = map(strength, 0, activePheromoneStrength, 50, 255);  // Map strength to opacity
+            const alpha = map(strength, 0, activePheromoneStrength, 50, 255);
             fill(0, 0, 255, alpha);
             rect(x, y, 3, 3);
           }
@@ -200,24 +200,20 @@
     </body>
     </html>
     
-    Here are the changes made to draw the pheromones every 3 pixels, increase the opacity for better visibility, and increase the strength difference between passive and active pheromones:
+    Here are the changes made to keep the ants on the top drawn layer and increase the number of food clusters:
     
-    1. Changed the values of `passivePheromoneStrength` and `activePheromoneStrength`:
-       - Decreased `passivePheromoneStrength` from 10 to 5.
-       - Increased `activePheromoneStrength` from 50 to 100.
-       This will make the active pheromone trails (laid by ants carrying food) much stronger compared to the passive trails.
+    1. Changed the order of drawing in the `draw()` function:
+       - The pheromones are now drawn before the ants.
+       - This means that the ants will always be drawn on top of the pheromones and other elements, keeping them visible even when they are on top of the nest or food.
     
-    2. In the `drawPheromones()` function:
-       - Changed the `for` loops to increment `x` and `y` by 3 instead of 2. This means it will draw a pheromone dot every 3 pixels in both dimensions.
-       - Changed the size of the drawn rectangles from `2x2` to `3x3`, matching the new spacing of the pheromone dots.
-       - Added a mapping for the alpha (opacity) value of the pheromone color. It now maps the pheromone strength from the range 0 to `activePheromoneStrength` to the range 50 to 255. This means that even the weakest pheromone trails will have an opacity of 50, making them more visible. The strongest trails will have an opacity of 255, making them fully opaque.
+    2. Increased the value of `foodClusters` from 5 to 10:
+       - This will double the number of food clusters that are initially spawned when the simulation starts.
+       - With more food clusters, the ants will have more options to explore and exploit, leading to more complex foraging patterns.
     
-    Drawing the pheromones every 3 pixels will slightly reduce the detail of the trails compared to every 2 pixels, but it will also reduce the computational load. The trails should still be quite clear.
+    By drawing the ants after the pheromones, nest, and food, we ensure that the ants are always fully visible. They will no longer visually disappear when they are on top of other elements.
     
-    Increasing the opacity of the pheromone trails will make them stand out more against the white background. Even weak trails will be fairly visible, while strong trails will be very prominent. This should make it easier to see the paths the ants are taking, even when the pheromone strength starts to decay.
+    Increasing the number of food clusters will provide the ants with a richer environment to navigate. With more food sources scattered around the canvas, the ants will have to make more decisions about which trails to follow and which sources to exploit. This can lead to the emergence of more complex collective behavior.
     
-    Increasing the difference between passive and active pheromone strengths will create a stronger contrast between the trails left by exploring ants and the trails left by ants that have found food. The active trails will be much more attractive to other ants, helping to recruit more ants to productive food sources more quickly.
+    Observe how the increased food availability affects the foraging patterns of the ant colony. You might see more branching and merging of trails as ants discover and communicate about the various food sources.
     
-    These changes should improve the visibility and interpretability of the pheromone trails, while still maintaining good performance.
-    
-    As always, feel free to tweak these parameters further based on your preferences and observations!
+    Feel free to adjust the `foodClusters` value even further to see how the colony responds to different levels of resource abundance!
