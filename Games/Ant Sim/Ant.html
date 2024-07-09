@@ -1,5 +1,5 @@
 <html><head><base href="https://graeycowl.github.io/">
-    <title>Ant Colony Simulation with Blue Pheromone Trails</title>
+    <title>Ant Colony Simulation with Enhanced Pheromone Visibility</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
     <style>
     html, body {
@@ -19,8 +19,8 @@
     const sensorAngle = Math.PI / 4;
     const sensorDistance = 20;
     const antSpeed = 2;
-    const passivePheromoneStrength = 10;
-    const activePheromoneStrength = 50;
+    const passivePheromoneStrength = 5;  // Decreased passive strength
+    const activePheromoneStrength = 100;  // Increased active strength
     const foodClusters = 5;
     const foodsPerCluster = 10;
     
@@ -180,13 +180,13 @@
     
     function drawPheromones() {
       noStroke();
-      for (let x = 0; x < width; x += 2) {
-        for (let y = 0; y < height; y += 2) {
+      for (let x = 0; x < width; x += 3) {
+        for (let y = 0; y < height; y += 3) {
           const strength = pheromones[x][y];
           if (strength > 0) {
-            const c = Math.floor(strength);
-            fill(0, 0, 255, strength);  // Blue color
-            rect(x, y, 2, 2);
+            const alpha = map(strength, 0, activePheromoneStrength, 50, 255);  // Map strength to opacity
+            fill(0, 0, 255, alpha);
+            rect(x, y, 3, 3);
           }
         }
       }  
@@ -200,19 +200,24 @@
     </body>
     </html>
     
-    Here are the changes made to draw the pheromones every 2 pixels and turn the trail blue:
+    Here are the changes made to draw the pheromones every 3 pixels, increase the opacity for better visibility, and increase the strength difference between passive and active pheromones:
     
-    1. In the `drawPheromones()` function:
-       - Changed the `for` loops to increment `x` and `y` by 2 instead of 1. This means it will draw a pheromone dot every 2 pixels in both dimensions.
-       - Changed the size of the drawn rectangles from `1x1` to `2x2`, matching the spacing of the pheromone dots.
-       - Changed the fill color to `fill(0, 0, 255, strength)`, which is a blue color with an alpha (transparency) value determined by the pheromone strength.
+    1. Changed the values of `passivePheromoneStrength` and `activePheromoneStrength`:
+       - Decreased `passivePheromoneStrength` from 10 to 5.
+       - Increased `activePheromoneStrength` from 50 to 100.
+       This will make the active pheromone trails (laid by ants carrying food) much stronger compared to the passive trails.
     
-    Drawing the pheromones every 2 pixels instead of every single pixel will reduce the computational load compared to the previous version, while still providing a relatively detailed trail. The trails will not be quite as fine, but they should still be clear and easy to follow.
+    2. In the `drawPheromones()` function:
+       - Changed the `for` loops to increment `x` and `y` by 3 instead of 2. This means it will draw a pheromone dot every 3 pixels in both dimensions.
+       - Changed the size of the drawn rectangles from `2x2` to `3x3`, matching the new spacing of the pheromone dots.
+       - Added a mapping for the alpha (opacity) value of the pheromone color. It now maps the pheromone strength from the range 0 to `activePheromoneStrength` to the range 50 to 255. This means that even the weakest pheromone trails will have an opacity of 50, making them more visible. The strongest trails will have an opacity of 255, making them fully opaque.
     
-    Changing the color of the pheromone trail to blue provides a nice contrast with the white background and the green food dots. Blue is often associated with communication and information transfer, which fits nicely with the role of pheromones in the ant colony simulation.
+    Drawing the pheromones every 3 pixels will slightly reduce the detail of the trails compared to every 2 pixels, but it will also reduce the computational load. The trails should still be quite clear.
     
-    The transparency of the blue color is still tied to the strength of the pheromone, so stronger pheromone trails will appear as a more solid blue, while weaker trails will be more transparent.
+    Increasing the opacity of the pheromone trails will make them stand out more against the white background. Even weak trails will be fairly visible, while strong trails will be very prominent. This should make it easier to see the paths the ants are taking, even when the pheromone strength starts to decay.
     
-    These changes should maintain the performance improvements from drawing the pheromones less frequently, while still providing an attractive and informative visualization of the pheromone trails.
+    Increasing the difference between passive and active pheromone strengths will create a stronger contrast between the trails left by exploring ants and the trails left by ants that have found food. The active trails will be much more attractive to other ants, helping to recruit more ants to productive food sources more quickly.
     
-    Feel free to experiment with different colors, transparencies, and drawing frequencies to find a visualization that you find most appealing and informative!
+    These changes should improve the visibility and interpretability of the pheromone trails, while still maintaining good performance.
+    
+    As always, feel free to tweak these parameters further based on your preferences and observations!
