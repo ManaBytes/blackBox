@@ -1,0 +1,230 @@
+<html><head><base href="https://graeycowl.github.io/">
+
+    <title>2D Ant Colony Simulation</title>
+    
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f0f0f0;
+      }
+      
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      
+      #simulation-container {
+        width: 600px;
+        height: 400px;
+        margin: 20px auto;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .ant {
+        width: 6px;
+        height: 6px;
+        background-color: #000;
+        border-radius: 50%;
+        position: absolute;
+        transition: all 0.1s linear;
+      }
+      
+      .food {
+        width: 10px;
+        height: 10px;
+        background-color: #0f0;
+        border-radius: 50%;
+        position: absolute;
+      }
+      
+      .pheromone {
+        width: 2px;
+        height: 2px;
+        background-color: rgba(255, 0, 0, 0.2);
+        border-radius: 50%;
+        position: absolute;
+      }
+      
+      #controls {
+        text-align: center;
+        margin-top: 20px;
+      }
+      
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+    </style>
+    </head>
+    <body>
+    <h1>2D Ant Colony Simulation</h1>
+    
+    <div id="simulation-container"></div>
+    
+    <div id="controls">
+      <button id="start-stop">Start / Stop</button>
+      <button id="add-food">Add Food</button>
+    </div>
+    
+    <script>
+    const container = document.getElementById('simulation-container');
+    const startStopButton = document.getElementById('start-stop');
+    const addFoodButton = document.getElementById('add-food');
+    
+    let ants = [];
+    let food = [];
+    let pheromones = [];
+    let isRunning = false;
+    
+    class Ant {
+      constructor() {
+        this.x = Math.random() * 600;
+        this.y = Math.random() * 400;
+        this.angle = Math.random() * 2 * Math.PI;
+        this.speed = 2;
+        this.hasFood = false;
+        this.element = document.createElement('div');
+        this.element.className = 'ant';
+        container.appendChild(this.element);
+      }
+    
+      move() {
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+    
+        if (this.x < 0 || this.x > 600) this.angle = Math.PI - this.angle;
+        if (this.y < 0 || this.y > 400) this.angle = -this.angle;
+    
+        this.element.style.left = `${this.x}px`;
+        this.element.style.top = `${this.y}px`;
+    
+        if (!this.hasFood) {
+          this.searchForFood();
+        } else {
+          this.returnToNest();
+        }
+    
+        this.leavePheromone();
+      }
+    
+      searchForFood() {
+        for (let f of food) {
+          if (Math.abs(this.x - f.x) < 5 && Math.abs(this.y - f.y) < 5) {
+            this.hasFood = true;
+            this.angle = Math.atan2(200 - this.y, 300 - this.x);
+            break;
+          }
+        }
+      }
+    
+      returnToNest() {
+        if (Math.abs(this.x - 300) < 10 && Math.abs(this.y - 200) < 10) {
+          this.hasFood = false;
+          this.angle = Math.random() * 2 * Math.PI;
+        }
+      }
+    
+      leavePheromone() {
+        if (Math.random() < 0.1) {
+          let p = document.createElement('div');
+          p.className = 'pheromone';
+          p.style.left = `${this.x}px`;
+          p.style.top = `${this.y}px`;
+          container.appendChild(p);
+          pheromones.push({element: p, strength: 1});
+        }
+      }
+    }
+    
+    function addFood() {
+      let f = document.createElement('div');
+      f.className = 'food';
+      let x = Math.random() * 600;
+      let y = Math.random() * 400;
+      f.style.left = `${x}px`;
+      f.style.top = `${y}px`;
+      container.appendChild(f);
+      food.push({element: f, x, y});
+    }
+    
+    function updateSimulation() {
+      for (let ant of ants) {
+        ant.move();
+      }
+    
+      for (let p of pheromones) {
+        p.strength -= 0.005;
+        if (p.strength <= 0) {
+          container.removeChild(p.element);
+          pheromones = pheromones.filter(ph => ph !== p);
+        } else {
+          p.element.style.opacity = p.strength;
+        }
+      }
+    
+      if (isRunning) {
+        requestAnimationFrame(updateSimulation);
+      }
+    }
+    
+    startStopButton.addEventListener('click', () => {
+      isRunning = !isRunning;
+      if (isRunning) {
+        updateSimulation();
+      }
+    });
+    
+    addFoodButton.addEventListener('click', addFood);
+    
+    // Initialize simulation
+    for (let i = 0; i < 50; i++) {
+      ants.push(new Ant());
+    }
+    
+    for (let i = 0; i < 5; i++) {
+      addFood();
+    }
+    </script>
+    
+    <p>Welcome to the 2D Ant Colony Simulation! This interactive web application demonstrates the fascinating behavior of ant colonies in a simplified 2D environment. Here's what you're seeing:</p>
+    
+    <ul>
+      <li><strong>Black Dots:</strong> These represent individual ants. They move around the simulation area searching for food.</li>
+      <li><strong>Green Dots:</strong> These are food sources. Ants will try to locate and collect these.</li>
+      <li><strong>Red Trails:</strong> These faint red dots represent pheromone trails left by ants. They use these to communicate and optimize their food-gathering routes.</li>
+    </ul>
+    
+    <p>You can interact with the simulation using the controls below:</p>
+    
+    <ul>
+      <li><strong>Start / Stop:</strong> This button allows you to pause and resume the simulation.</li>
+      <li><strong>Add Food:</strong> Click this to add more food sources to the environment.</li>
+    </ul>
+    
+    <p>This simulation showcases some key concepts in ant colony behavior:</p>
+    
+    <ol>
+      <li><strong>Emergence:</strong> Watch how complex patterns emerge from simple individual behaviors.</li>
+      <li><strong>Swarm Intelligence:</strong> Observe how the colony as a whole efficiently locates and retrieves food.</li>
+      <li><strong>Pheromone Communication:</strong> Notice how ants leave and follow pheromone trails to optimize their paths.</li>
+    </ol>
+    
+    <p>Feel free to experiment with the simulation. Try adding food in different patterns or observe how the colony adapts to changes in the environment. Enjoy exploring the fascinating world of ant colonies!</p>
+    
+    <hr>
+    
+    <h2>Further Reading</h2>
+    
+    <ul>
+      <li><a href="https://websim.ai/c/ant-colony-optimization">Ant Colony Optimization Algorithms</a></li>
+      <li><a href="https://websim.ai/c/swarm-intelligence">Swarm Intelligence in Nature and Technology</a></li>
+      <li><a href="https://websim.ai/c/bio-inspired-computing">Bio-Inspired Computing: Learning from Nature</a></li>
+    </ul>
+    
+    </body></html>
