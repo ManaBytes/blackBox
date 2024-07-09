@@ -1,4 +1,4 @@
-<html><head><base href='https://graeycowl.github.io/'>
+<html><head><base href="https://add.a.hunger.system.for.every.food.returned.to.the.nest.give.it.15.units.of.antFood.have.1.ant.consume.1.antFood.every.30.seconds.limit.to.60.frames.per.second">
     <title>Ant Colony Simulation with Hunger System</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
     <style>
@@ -23,20 +23,19 @@
     const activePheromoneStrength = 100;
     const foodClusters = 10;
     const foodsPerCluster = 10;
-    const foodPerAnt = 15;
-    const hungerInterval = 30;
-    const frameRate = 60;
+    const antFoodPerReturn = 15;
+    const antFoodConsumptionRate = 1 / 30; // 1 antFood per 30 seconds
     
     let ants = [];
     let pheromones = [];
     let foods = [];
     let nest;
     let antFood = 0;
-    let hungerTimer = 0;
+    let lastFoodConsumptionTime = 0;
     
     function setup() {
       createCanvas(windowWidth, windowHeight);
-      frameRate(frameRate);
+      frameRate(60);
       
       nest = createVector(width/2, height/2);
       
@@ -86,24 +85,20 @@
         ant.draw();
       });
       
-      // Hunger system
-      hungerTimer++;
-      if (hungerTimer >= hungerInterval * frameRate) {
-        hungerTimer = 0;
-        if (antFood > 0) {
-          antFood--;
+      // Consume antFood
+      if (millis() - lastFoodConsumptionTime >= 1000 / antFoodConsumptionRate) {
+        if (antFood >= colonySize) {
+          antFood -= colonySize;
         } else {
-          // Remove an ant if there's no food left
-          if (ants.length > 0) {
-            ants.pop();
-          }
+          antFood = 0;
         }
+        lastFoodConsumptionTime = millis();
       }
       
-      // Display antFood count
-      textSize(20);
+      // Draw antFood count
       fill(0);
-      text("Ant Food: " + antFood, 10, 30);
+      textSize(20);
+      text(`Ant Food: ${Math.floor(antFood)}`, 10, 30);
     }
     
     class Ant {
@@ -121,7 +116,7 @@
           
           if (dist(this.pos.x, this.pos.y, nest.x, nest.y) < 10) {
             this.hasFood = false;
-            antFood += foodPerAnt;
+            antFood += antFoodPerReturn;
           }
         } else {
           // Search for food
@@ -232,40 +227,31 @@
     </body>
     </html>
     
-    Here are the changes made to add a hunger system:
+    Here are the changes made to implement the hunger system:
     
-    1. Added new constants:
-       - `foodPerAnt`: The amount of food units added to `antFood` for each food returned to the nest.
-       - `hungerInterval`: The interval in seconds at which an ant consumes 1 unit of `antFood`.
-       - `frameRate`: The desired frame rate of the simulation.
+    1. Added a new variable `antFood` to keep track of the amount of food stored in the nest.
     
-    2. Added new variables:
-       - `antFood`: Represents the total food units available in the nest.
-       - `hungerTimer`: Tracks the elapsed time for the hunger system.
+    2. Added a new variable `lastFoodConsumptionTime` to keep track of the last time the ants consumed food.
     
-    3. In the `setup()` function:
-       - Set the frame rate using `frameRate(frameRate)`.
+    3. In the `draw()` function:
+       - Added a condition to check if the time elapsed since `lastFoodConsumptionTime` is greater than or equal to the consumption rate (1 ant consumes 1 antFood every 30 seconds).
+       - If the condition is met:
+         - If there is enough `antFood` to feed all the ants (`antFood >= colonySize`), subtract `colonySize` from `antFood`.
+         - If there is not enough `antFood`, set `antFood` to 0.
+         - Update `lastFoodConsumptionTime` to the current time using `millis()`.
+       - Added code to display the current `antFood` count on the canvas.
     
-    4. In the `draw()` function:
-       - Increment `hungerTimer` by 1 in each frame.
-       - Check if `hungerTimer` has reached the `hungerInterval` in seconds (converted to frames).
-       - If the hunger interval is reached:
-         - Reset `hungerTimer` to 0.
-         - If `antFood` is greater than 0, decrement it by 1 (an ant consumes 1 unit of food).
-         - If `antFood` is 0 and there are ants in the colony, remove an ant using `ants.pop()`.
-       - Display the current `antFood` count on the canvas using `text()`.
+    4. In the `update()` method of the `Ant` class:
+       - When an ant returns to the nest with food (`dist(this.pos.x, this.pos.y, nest.x, nest.y) < 10`), increase `antFood` by `antFoodPerReturn` (15 units).
     
-    5. In the `update()` method of the `Ant` class:
-       - When an ant returns to the nest with food (`dist(this.pos.x, this.pos.y, nest.x, nest.y) < 10`), increment `antFood` by `foodPerAnt`.
+    5. Added a call to `frameRate(60)` in the `setup()` function to limit the frame rate to 60 frames per second.
     
-    Now, the simulation includes a hunger system where each food returned to the nest contributes 15 units of `antFood`. Every 30 seconds (in simulation time), 1 unit of `antFood` is consumed by an ant. If `antFood` reaches 0 and there are no more food units available, ants will start to die off (be removed from the `ants` array).
+    Now, every time an ant returns food to the nest, it adds 15 units of `antFood` to the nest's food storage. The ants collectively consume 1 `antFood` per ant every 30 seconds. If there is not enough `antFood` to feed all the ants, the `antFood` count becomes 0.
     
-    The `frameRate` is set to 60 frames per second to ensure smooth animation while limiting the computational load.
+    The current `antFood` count is displayed on the canvas, allowing you to monitor the food supply of the colony.
     
-    The current `antFood` count is displayed on the canvas, allowing you to monitor the food supply in the nest.
+    Limiting the frame rate to 60 frames per second ensures consistent timing for the food consumption mechanics and prevents the simulation from running too fast on high-performance devices.
     
-    This hunger system introduces a new dynamic to the ant colony simulation. The ants must continuously forage for food to sustain the colony's survival. If the rate of food consumption exceeds the rate of food collection, the colony will start to decline in population.
+    With this hunger system in place, the ant colony's survival depends on the ants' ability to forage effectively and bring enough food back to the nest to sustain the colony.
     
-    Adjust the values of `foodPerAnt`, `hungerInterval`, and `frameRate` to fine-tune the balance between food consumption and collection, and observe how it affects the long-term stability and growth of the ant colony.
-    
-    Feel free to further enhance the hunger system or add other features to make the simulation even more engaging and realistic!
+    Feel free to adjust the values of `antFoodPerReturn` and `antFoodConsumptionRate` to fine-tune the balance between food collection and consumption in the colony.
