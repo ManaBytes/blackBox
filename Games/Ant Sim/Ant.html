@@ -1,5 +1,5 @@
-<html><head><base href="https://add.a.hunger.system.for.every.food.returned.to.the.nest.give.it.15.units.of.antFood.have.1.ant.consume.1.antFood.every.30.seconds.limit.to.60.frames.per.second">
-    <title>Ant Colony Simulation with Hunger System</title>
+<html><head><base href="https://graeycowl.github.io/">
+    <title>Ant Colony Simulation with Unbaked Hunger System</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
     <style>
     html, body {
@@ -57,7 +57,7 @@
     }
     
     function draw() {
-      background(255);
+      background(240, 230, 140); // Soft brown color
       
       // Update pheromones
       for (let x = 0; x < width; x++) {
@@ -67,7 +67,7 @@
       }
       
       // Draw nest
-      fill(139, 69, 19); // Brown color
+      fill(128, 0, 128); // Purple color
       ellipse(nest.x, nest.y, 20, 20);
       
       // Draw foods
@@ -227,31 +227,16 @@
     </body>
     </html>
     
-    Here are the changes made to implement the hunger system:
+    Here are the changes made to update the nest fill color to purple and the background color to soft brown:
     
-    1. Added a new variable `antFood` to keep track of the amount of food stored in the nest.
+    1. In the `draw()` function:
+       - Changed the background color to a soft brown using `background(240, 230, 140)`.
+       - Changed the nest fill color to purple using `fill(128, 0, 128)`.
     
-    2. Added a new variable `lastFoodConsumptionTime` to keep track of the last time the ants consumed food.
+    Now, the nest is filled with a purple color `(128, 0, 128)`, making it visually distinct from the ants and the food sources.
     
-    3. In the `draw()` function:
-       - Added a condition to check if the time elapsed since `lastFoodConsumptionTime` is greater than or equal to the consumption rate (1 ant consumes 1 antFood every 30 seconds).
-       - If the condition is met:
-         - If there is enough `antFood` to feed all the ants (`antFood >= colonySize`), subtract `colonySize` from `antFood`.
-         - If there is not enough `antFood`, set `antFood` to 0.
-         - Update `lastFoodConsumptionTime` to the current time using `millis()`.
-       - Added code to display the current `antFood` count on the canvas.
+    The background color has been changed to a soft brown `(240, 230, 140)`, providing a warmer and more natural-looking environment for the ant colony simulation.
     
-    4. In the `update()` method of the `Ant` class:
-       - When an ant returns to the nest with food (`dist(this.pos.x, this.pos.y, nest.x, nest.y) < 10`), increase `antFood` by `antFoodPerReturn` (15 units).
+    These color changes enhance the visual aesthetics of the simulation while still maintaining clear distinction between the different elements.
     
-    5. Added a call to `frameRate(60)` in the `setup()` function to limit the frame rate to 60 frames per second.
-    
-    Now, every time an ant returns food to the nest, it adds 15 units of `antFood` to the nest's food storage. The ants collectively consume 1 `antFood` per ant every 30 seconds. If there is not enough `antFood` to feed all the ants, the `antFood` count becomes 0.
-    
-    The current `antFood` count is displayed on the canvas, allowing you to monitor the food supply of the colony.
-    
-    Limiting the frame rate to 60 frames per second ensures consistent timing for the food consumption mechanics and prevents the simulation from running too fast on high-performance devices.
-    
-    With this hunger system in place, the ant colony's survival depends on the ants' ability to forage effectively and bring enough food back to the nest to sustain the colony.
-    
-    Feel free to adjust the values of `antFoodPerReturn` and `antFoodConsumptionRate` to fine-tune the balance between food collection and consumption in the colony.
+    Feel free to experiment with different color combinations to customize the look and feel of the ant colony simulation according to your preferences!
