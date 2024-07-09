@@ -15,7 +15,7 @@
     <body>
     <script>
     const colonySize = 100;
-    const pheromoneEvaporation = 0.85;
+    const pheromoneEvaporation = 0.75; // Faster evaporation rate
     const sensorAngle = Math.PI / 4;
     const sensorDistance = 20;
     const antSpeed = 2;
@@ -23,8 +23,7 @@
     const activePheromoneStrength = 100;
     const foodClusters = 10;
     const foodsPerCluster = 10;
-    const antFoodPerReturn = 15;
-    const antFoodConsumptionRate = 1 / 30; // 1 antFood per 30 seconds
+    const antFoodPerReturn = 30; // Doubled antFoodPerReturn
     
     let ants = [];
     let pheromones = [];
@@ -229,24 +228,23 @@
     </body>
     </html>
     
-    Here are the changes made to update the background color to `rgb(102, 68, 0)` and give the food a white outline:
+    Here are the changes made to double `antFoodPerReturn` and make `pheromoneEvaporation` faster:
     
-    1. In the `draw()` function:
-       - Changed the background color to a dark brown using `background(102, 68, 0)`.
-       - Before drawing the food, added `stroke(255)` to set the outline color to white.
-       - After drawing the food, added `noStroke()` to remove the outline for other elements.
+    1. Changed the value of `antFoodPerReturn` from 15 to 30, effectively doubling the amount of food an ant brings back to the nest per return.
     
-    2. In the `draw()` function:
-       - Changed the text color for the `antFood` count to white using `fill(255)`.
+    2. Changed the value of `pheromoneEvaporation` from 0.85 to 0.75, resulting in a faster evaporation rate for the pheromone trails.
     
-    Now, the background color is set to a dark brown `(102, 68, 0)`, creating a richer and more contrasting environment for the ant colony simulation.
+    By doubling `antFoodPerReturn`, each ant will now contribute 30 units of food to the nest's food supply when they successfully return with food. This means that the colony will accumulate food more quickly, potentially allowing it to sustain a larger population of ants.
     
-    The food sources are now drawn with a white outline using `stroke(255)` before drawing each food ellipse. This white outline makes the food more visible and distinguishable against the dark brown background.
+    Increasing the `pheromoneEvaporation` rate to 0.75 means that the pheromone trails will dissipate more rapidly over time. This faster evaporation can encourage the ants to explore new areas and adapt their foraging strategies more quickly in response to changing food availability.
     
-    The `noStroke()` function is called after drawing the food to remove the outline for other elements like the nest, ants, and pheromone trails.
+    These changes can have significant effects on the dynamics of the ant colony simulation:
     
-    The text color for the `antFood` count has been changed to white using `fill(255)` to ensure better readability against the darker background.
+    - With more food being brought back per return, the colony may be able to grow and sustain itself more efficiently, as long as there are sufficient food sources available.
+    - The faster pheromone evaporation can lead to more dynamic and adaptive foraging behavior, as the ants will need to continuously update their trails based on the most recent successful food findings.
     
-    These color adjustments enhance the visual contrast and clarity of the simulation, making it easier to identify and track the different elements on the canvas.
+    Observe how these parameter adjustments influence the overall behavior and success of the ant colony. You may notice changes in the speed at which the colony accumulates food, the efficiency of the foraging process, and the responsiveness of the ants to changes in the environment.
     
-    Feel free to further customize the colors and visual styles to suit your preferences and create an engaging ant colony simulation!
+    Feel free to further experiment with different values for `antFoodPerReturn` and `pheromoneEvaporation` to fine-tune the simulation according to your desired outcomes and observations. Finding the right balance between these parameters can be crucial for creating a stable and thriving ant colony.
+
+    <!-- last change from vTVLdkaKIC1LJi78z -->
