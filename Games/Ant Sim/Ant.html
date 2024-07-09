@@ -1,5 +1,5 @@
 <html><head><base href="https://graeycowl.github.io/">
-    <title>Ant Colony Simulation with Faster Pheromone Evaporation</title>
+    <title>Ant Colony Simulation with Faster, Smaller Pheromone Trails</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
     <style>
     html, body {
@@ -15,7 +15,7 @@
     <body>
     <script>
     const colonySize = 100;
-    const pheromoneEvaporation = 0.85;  // Increased evaporation rate
+    const pheromoneEvaporation = 0.85;
     const sensorAngle = Math.PI / 4;
     const sensorDistance = 20;
     const antSpeed = 2;
@@ -68,7 +68,7 @@
       // Draw foods
       fill(0, 255, 0);
       foods.forEach(food => {
-        ellipse(food.x, food.y, 5, 5);  // Smaller food size
+        ellipse(food.x, food.y, 5, 5);
       });
       
       // Update and draw ants
@@ -179,13 +179,14 @@
     }
     
     function drawPheromones() {
-      for (let x = 0; x < width; x += 5) {
-        for (let y = 0; y < height; y += 5) {
+      noStroke();
+      for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
           const strength = pheromones[x][y];
           if (strength > 0) {
             const c = Math.floor(strength);
             fill(c, 0, 255-c, strength);
-            rect(x, y, 5, 5); 
+            rect(x, y, 1, 1);  // Draw smaller pheromone dots
           }
         }
       }  
@@ -199,16 +200,19 @@
     </body>
     </html>
     
-    The only change made was to increase the value of the `pheromoneEvaporation` constant from `0.95` to `0.85`. 
+    Here are the changes made to draw the pheromones faster and reduce their size for a more defined trail:
     
-    Increasing the evaporation rate means that pheromones will dissipate more quickly over time. This will cause the pheromone trails to fade away faster, clearing the screen more rapidly.
+    1. In the `drawPheromones()` function:
+       - Removed the `for` loops that were stepping by 5 pixels. Now it loops through every pixel.
+       - Changed the size of the drawn rectangles from `5x5` to `1x1`, making each pheromone dot much smaller.
+       - Added `noStroke()` to remove the outline around each pheromone dot, which can make the trails appear cleaner.
     
-    With a higher evaporation rate, only the most recent and strongest pheromone trails will be clearly visible. Older trails will fade away quickly, providing a clearer view of the ants' current activity.
+    By drawing the pheromones at every pixel instead of every 5 pixels, the pheromone trails will be updated much more frequently. This will make the trails appear to form and update faster.
     
-    This can be useful for observing the dynamic behavior of the ant colony, as it will emphasize the most active trails and food sources at any given moment.
+    Reducing the size of each pheromone dot to just 1 pixel will make the trails much thinner and more defined. The ants will leave a fine trail behind them, rather than a thick swath.
     
-    However, note that if the evaporation rate is set too high, pheromone trails may dissipate too quickly to effectively guide other ants. It's a balance between clarity and the effectiveness of the pheromone communication system.
+    These changes should result in pheromone trails that are quicker to appear and update, and that form more precise, thin lines on the canvas. This can make it easier to see the exact paths the ants are taking and how these paths evolve over time.
     
-    Feel free to experiment with different evaporation rates to see how it affects the visibility of the trails and the behavior of the ant colony!
+    However, drawing every pixel separately can be more computationally intensive than drawing larger rectangles. Depending on the size of your canvas and the speed of your computer, this might affect the overall performance of the simulation. If you notice any slowdown, you could experiment with drawing the pheromones every 2 or 3 pixels instead of every single pixel.
     
-    Let me know if you have any other questions or ideas to explore.
+    Let me know if you have any other ideas to visualize the pheromone trails or optimize the simulation!
