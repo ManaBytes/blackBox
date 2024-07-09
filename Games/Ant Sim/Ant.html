@@ -1,5 +1,5 @@
-<html><head><base href="https://graeycowl.github.io/">
-    <title>Ant Colony Simulation with Nest</title>
+<html><head><base href="https://spawn.food.in.multiple.clumps.to.simulate.the.ants.small.size/">
+    <title>Ant Colony Simulation with Clustered Food</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
     <style>
     html, body {
@@ -20,7 +20,8 @@
     const sensorDistance = 20;
     const antSpeed = 2;
     const pheromoneStrength = 50;
-    const foodSources = 3;
+    const foodClusters = 5;
+    const foodsPerCluster = 10;
     
     let ants = [];
     let pheromones = [];
@@ -36,8 +37,14 @@
         ants.push(new Ant());
       }
       
-      for (let i = 0; i < foodSources; i++) {
-        foods.push(createVector(random(width), random(height)));
+      for (let i = 0; i < foodClusters; i++) {
+        const clusterX = random(width);
+        const clusterY = random(height);
+        for (let j = 0; j < foodsPerCluster; j++) {
+          const foodX = clusterX + random(-50, 50);
+          const foodY = clusterY + random(-50, 50);
+          foods.push(createVector(foodX, foodY));
+        }
       }
       
       pheromones = new Array(width).fill().map(() => new Array(height).fill(0));
@@ -60,7 +67,7 @@
       // Draw foods
       fill(0, 255, 0);
       foods.forEach(food => {
-        ellipse(food.x, food.y, 10, 10);
+        ellipse(food.x, food.y, 5, 5);  // Smaller food size
       });
       
       // Update and draw ants
@@ -103,7 +110,15 @@
           if (foodIndex !== -1) {
             foods.splice(foodIndex, 1);
             this.hasFood = true;
-            foods.push(createVector(random(width), random(height)));
+            if (random(1) < 0.1) { // 10% chance to spawn a new food cluster
+              const clusterX = random(width);
+              const clusterY = random(height);
+              for (let j = 0; j < foodsPerCluster; j++) {
+                const foodX = clusterX + random(-50, 50);
+                const foodY = clusterY + random(-50, 50);
+                foods.push(createVector(foodX, foodY));
+              }
+            }
           }
         }
         
@@ -118,7 +133,7 @@
           } 
         }
       }
-      
+    
       sense() {
         let maxPheromone = 0;
         let maxAngle = 0;
@@ -181,18 +196,18 @@
     </body>
     </html>
     
-    I made the following changes to add a nest:
+    Here are the changes made to spawn food in clusters:
     
-    1. Added a `nest` variable to store the position of the nest. It's set to the center of the canvas in the `setup()` function.
+    1. Introduced new constants `foodClusters` (number of food clusters) and `foodsPerCluster` (number of food items per cluster).
     
-    2. The ants now start at the nest position in the `Ant` constructor.
+    2. Modified the food spawning logic in the `setup()` function. Now, for each food cluster, a random position is chosen, and then `foodsPerCluster` food items are spawned around that position with random offsets.
     
-    3. When an ant is carrying food, it now moves directly towards the nest, instead of just moving in the opposite direction. This is done by calculating a vector from the ant's position to the nest, and setting the ant's velocity to this vector.
+    3. Reduced the size of the food items in the `draw()` function to simulate the ants' small size relative to the food.
     
-    4. When an ant reaches the nest (i.e., gets within 10 pixels of it), it drops the food and a new food source is randomly placed on the canvas.
+    4. When an ant picks up a food item, there's now a 10% chance that a new food cluster will spawn. This is to replenish the food supply gradually as it's consumed.
     
-    5. The nest is drawn as a brown circle in the `draw()` function.
+    Now the food will appear in clusters around the canvas, simulating patches of resources that the ants might encounter in a real environment. The ants will still use pheromone trails to efficiently locate and exploit these clusters.
     
-    Now the ants will bring the food they find back to the central nest location. When they reach the nest, they'll drop the food and go out to search for more. The nest serves as a hub that the ants radiate out from and return to.
+    The smaller size of the food items relative to the ants helps to create the illusion that the ants are small creatures navigating a large environment.
     
-    Let me know if you have any other questions!
+    Let me know if you have any other questions or ideas to enhance the simulation!
