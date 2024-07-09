@@ -1,5 +1,5 @@
 <html><head><base href="https://graeycowl.github.io/">
-    <title>Ant Colony Simulation with Unbaked Hunger System</title>
+    <title>Ant Colony Simulation with Hunger System</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
     <style>
     html, body {
@@ -57,7 +57,7 @@
     }
     
     function draw() {
-      background(240, 230, 140); // Soft brown color
+      background(102, 68, 0); // Dark brown color
       
       // Update pheromones
       for (let x = 0; x < width; x++) {
@@ -72,9 +72,11 @@
       
       // Draw foods
       fill(0, 255, 0);
+      stroke(255); // White outline
       foods.forEach(food => {
         ellipse(food.x, food.y, 5, 5);
       });
+      noStroke();
       
       // Draw pheromones 
       drawPheromones();
@@ -96,7 +98,7 @@
       }
       
       // Draw antFood count
-      fill(0);
+      fill(255); // White color for text
       textSize(20);
       text(`Ant Food: ${Math.floor(antFood)}`, 10, 30);
     }
@@ -227,16 +229,24 @@
     </body>
     </html>
     
-    Here are the changes made to update the nest fill color to purple and the background color to soft brown:
+    Here are the changes made to update the background color to `rgb(102, 68, 0)` and give the food a white outline:
     
     1. In the `draw()` function:
-       - Changed the background color to a soft brown using `background(240, 230, 140)`.
-       - Changed the nest fill color to purple using `fill(128, 0, 128)`.
+       - Changed the background color to a dark brown using `background(102, 68, 0)`.
+       - Before drawing the food, added `stroke(255)` to set the outline color to white.
+       - After drawing the food, added `noStroke()` to remove the outline for other elements.
     
-    Now, the nest is filled with a purple color `(128, 0, 128)`, making it visually distinct from the ants and the food sources.
+    2. In the `draw()` function:
+       - Changed the text color for the `antFood` count to white using `fill(255)`.
     
-    The background color has been changed to a soft brown `(240, 230, 140)`, providing a warmer and more natural-looking environment for the ant colony simulation.
+    Now, the background color is set to a dark brown `(102, 68, 0)`, creating a richer and more contrasting environment for the ant colony simulation.
     
-    These color changes enhance the visual aesthetics of the simulation while still maintaining clear distinction between the different elements.
+    The food sources are now drawn with a white outline using `stroke(255)` before drawing each food ellipse. This white outline makes the food more visible and distinguishable against the dark brown background.
     
-    Feel free to experiment with different color combinations to customize the look and feel of the ant colony simulation according to your preferences!
+    The `noStroke()` function is called after drawing the food to remove the outline for other elements like the nest, ants, and pheromone trails.
+    
+    The text color for the `antFood` count has been changed to white using `fill(255)` to ensure better readability against the darker background.
+    
+    These color adjustments enhance the visual contrast and clarity of the simulation, making it easier to identify and track the different elements on the canvas.
+    
+    Feel free to further customize the colors and visual styles to suit your preferences and create an engaging ant colony simulation!
