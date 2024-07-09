@@ -1,5 +1,5 @@
-<html><head><base href="https://spawn.food.in.multiple.clumps.to.simulate.the.ants.small.size/">
-    <title>Ant Colony Simulation with Clustered Food</title>
+<html><head><base href="https://graeycowl.github.io/">
+    <title>Ant Colony Simulation with Passive and Active Pheromones</title>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
     <style>
     html, body {
@@ -19,7 +19,8 @@
     const sensorAngle = Math.PI / 4;
     const sensorDistance = 20;
     const antSpeed = 2;
-    const pheromoneStrength = 50;
+    const passivePheromoneStrength = 10;
+    const activePheromoneStrength = 50;
     const foodClusters = 5;
     const foodsPerCluster = 10;
     
@@ -125,15 +126,17 @@
         this.pos.add(this.vel);
         
         // Leave pheromone trail
-        if (this.hasFood) {
-          const x = Math.round(this.pos.x);
-          const y = Math.round(this.pos.y);
-          if (x >= 0 && x < width && y >= 0 && y < height) {
-            pheromones[x][y] = pheromoneStrength;
-          } 
+        const x = Math.round(this.pos.x);
+        const y = Math.round(this.pos.y);
+        if (x >= 0 && x < width && y >= 0 && y < height) {
+          if (this.hasFood) {
+            pheromones[x][y] = activePheromoneStrength;
+          } else {
+            pheromones[x][y] = Math.max(pheromones[x][y], passivePheromoneStrength);
+          }
         }
       }
-    
+      
       sense() {
         let maxPheromone = 0;
         let maxAngle = 0;
@@ -196,18 +199,16 @@
     </body>
     </html>
     
-    Here are the changes made to spawn food in clusters:
+    Here are the changes made to have the ants passively emit pheromones and emit stronger pheromones when carrying food:
     
-    1. Introduced new constants `foodClusters` (number of food clusters) and `foodsPerCluster` (number of food items per cluster).
+    1. Introduced two new constants: `passivePheromoneStrength` for the strength of pheromones passively emitted by ants, and `activePheromoneStrength` for the strength of pheromones emitted by ants when they are carrying food.
     
-    2. Modified the food spawning logic in the `setup()` function. Now, for each food cluster, a random position is chosen, and then `foodsPerCluster` food items are spawned around that position with random offsets.
+    2. Modified the pheromone trail logic in the `update()` method of the `Ant` class:
+       - If the ant is carrying food, it leaves a pheromone trail with strength `activePheromoneStrength`.
+       - If the ant is not carrying food, it still leaves a pheromone trail, but with strength `passivePheromoneStrength`. The `Math.max()` function is used to ensure that the pheromone strength at a point is not decreased by a passive ant walking over an active trail.
     
-    3. Reduced the size of the food items in the `draw()` function to simulate the ants' small size relative to the food.
+    Now, ants will always leave a weak pheromone trail as they move around, creating a network of paths. However, when an ant finds food and starts to carry it back to the nest, it will leave a much stronger pheromone trail. This will attract other ants more strongly to paths that lead to food.
     
-    4. When an ant picks up a food item, there's now a 10% chance that a new food cluster will spawn. This is to replenish the food supply gradually as it's consumed.
+    This change makes the ant behavior more realistic and efficient. The passive trails help ants explore the environment, while the stronger active trails help to recruit more ants to good food sources.
     
-    Now the food will appear in clusters around the canvas, simulating patches of resources that the ants might encounter in a real environment. The ants will still use pheromone trails to efficiently locate and exploit these clusters.
-    
-    The smaller size of the food items relative to the ants helps to create the illusion that the ants are small creatures navigating a large environment.
-    
-    Let me know if you have any other questions or ideas to enhance the simulation!
+    Let me know if you have any other ideas to make the simulation even more interesting!
