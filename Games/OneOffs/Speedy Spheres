@@ -1,324 +1,353 @@
-<html><head><base href="https://graeycowl.github.io/">
-<title>Speedy Spheres - Kiting Arena</title>
-<style>
-body, html {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: #001f3f;
-    font-family: Arial, sans-serif;
-}
-#game-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-#hud {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: #fff;
-    font-size: 16px;
-    text-shadow: 1px 1px 2px #000;
-}
-#minimap {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 150px;
-    height: 150px;
-    background-color: rgba(0,0,0,0.5);
-    border: 2px solid #fff;
-}
-#upgrade-menu {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(0,0,0,0.8);
-    padding: 20px;
-    border-radius: 10px;
-    display: none;
-}
-.upgrade-button {
-    display: block;
-    margin: 10px 0;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-</style>
-</head>
-<body>
-<canvas id="game-canvas"></canvas>
-<div id="hud">
-    <div>Level: <span id="level">1</span></div>
-    <div>Score: <span id="score">0</span></div>
-    <div>HP: <span id="hp">100</span></div>
-</div>
-<canvas id="minimap"></canvas>
-<div id="upgrade-menu">
-    <h2>Upgrade Your Tank</h2>
-    <button class="upgrade-button" onclick="upgradeFiringRate()">Increase Firing Rate</button>
-    <button class="upgrade-button" onclick="upgradeBubbleSize()">Increase Bubble Size</button>
-    <button class="upgrade-button" onclick="upgradeSpeed()">Increase Speed</button>
-</div>
+<html>
+  <head>
+    <base href="https://graeycowl.github.io/" />
+    <title>Speedy Spheres - Kiting Arena</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #001f3f;
+        font-family: Arial, sans-serif;
+      }
+      #game-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      #hud {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: #fff;
+        font-size: 16px;
+        text-shadow: 1px 1px 2px #000;
+      }
+      #minimap {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 150px;
+        height: 150px;
+        background-color: rgba(0, 0, 0, 0.5);
+        border: 2px solid #fff;
+      }
+      #upgrade-menu {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 10px;
+        display: none;
+      }
+      .upgrade-button {
+        display: block;
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="game-canvas"></canvas>
+    <div id="hud">
+      <div>Level: <span id="level">1</span></div>
+      <div>Score: <span id="score">0</span></div>
+      <div>HP: <span id="hp">100</span></div>
+    </div>
+    <canvas id="minimap"></canvas>
+    <div id="upgrade-menu">
+      <h2>Upgrade Your Tank</h2>
+      <button class="upgrade-button" onclick="upgradeFiringRate()">
+        Increase Firing Rate
+      </button>
+      <button class="upgrade-button" onclick="upgradeBubbleSize()">
+        Increase Bubble Size
+      </button>
+      <button class="upgrade-button" onclick="upgradeSpeed()">
+        Increase Speed
+      </button>
+    </div>
 
-<script>
-const canvas = document.getElementById('game-canvas');
-const ctx = canvas.getContext('2d');
-const minimap = document.getElementById('minimap');
-const minimapCtx = minimap.getContext('2d');
+    <script>
+      const canvas = document.getElementById("game-canvas");
+      const ctx = canvas.getContext("2d");
+      const minimap = document.getElementById("minimap");
+      const minimapCtx = minimap.getContext("2d");
 
-let player = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    radius: 20,
-    speed: 5,
-    firingRate: 500,
-    bubbleSize: 5
-};
+      let player = {
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        radius: 20,
+        speed: 5,
+        firingRate: 500,
+        bubbleSize: 5,
+      };
 
-let enemies = [];
-let bubbles = [];
-let score = 0;
-let level = 1;
-let hp = 100;
+      let enemies = [];
+      let bubbles = [];
+      let score = 0;
+      let level = 1;
+      let hp = 100;
 
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    minimap.width = 150;
-    minimap.height = 150;
-}
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        minimap.width = 150;
+        minimap.height = 150;
+      }
 
-function createEnemy() {
-    return {
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 15 + 10,
-        speed: Math.random() * 2 + 1,
-        color: `hsl(${Math.random() * 360}, 50%, 50%)`
-    };
-}
+      function createEnemy() {
+        return {
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 15 + 10,
+          speed: Math.random() * 2 + 1,
+          color: `hsl(${Math.random() * 360}, 50%, 50%)`,
+        };
+      }
 
-function drawPlayer() {
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#4CAF50';
-    ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-}
-
-function drawEnemies() {
-    enemies.forEach(enemy => {
+      function drawPlayer() {
         ctx.beginPath();
-        ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
-        ctx.fillStyle = enemy.color;
+        ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#4CAF50";
         ctx.fill();
-    });
-}
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
 
-function drawBubbles() {
-    bubbles.forEach(bubble => {
-        ctx.beginPath();
-        ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.fill();
-    });
-}
+      function drawEnemies() {
+        enemies.forEach((enemy) => {
+          ctx.beginPath();
+          ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+          ctx.fillStyle = enemy.color;
+          ctx.fill();
+        });
+      }
 
-function updateMinimap() {
-    minimapCtx.clearRect(0, 0, minimap.width, minimap.height);
-    minimapCtx.fillStyle = '#001f3f';
-    minimapCtx.fillRect(0, 0, minimap.width, minimap.height);
-    
-    const scaleFactor = minimap.width / canvas.width;
-    
-    // Draw player
-    minimapCtx.fillStyle = '#4CAF50';
-    minimapCtx.beginPath();
-    minimapCtx.arc(player.x * scaleFactor, player.y * scaleFactor, 3, 0, Math.PI * 2);
-    minimapCtx.fill();
-    
-    // Draw enemies
-    enemies.forEach(enemy => {
-        minimapCtx.fillStyle = enemy.color;
+      function drawBubbles() {
+        bubbles.forEach((bubble) => {
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+          ctx.fill();
+        });
+      }
+
+      function updateMinimap() {
+        minimapCtx.clearRect(0, 0, minimap.width, minimap.height);
+        minimapCtx.fillStyle = "#001f3f";
+        minimapCtx.fillRect(0, 0, minimap.width, minimap.height);
+
+        const scaleFactor = minimap.width / canvas.width;
+
+        // Draw player
+        minimapCtx.fillStyle = "#4CAF50";
         minimapCtx.beginPath();
-        minimapCtx.arc(enemy.x * scaleFactor, enemy.y * scaleFactor, 2, 0, Math.PI * 2);
+        minimapCtx.arc(
+          player.x * scaleFactor,
+          player.y * scaleFactor,
+          3,
+          0,
+          Math.PI * 2
+        );
         minimapCtx.fill();
-    });
-}
 
-function moveEnemies() {
-    enemies.forEach(enemy => {
-        const dx = player.x - enemy.x;
-        const dy = player.y - enemy.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        enemy.x += (dx / distance) * enemy.speed;
-        enemy.y += (dy / distance) * enemy.speed;
-    });
-}
+        // Draw enemies
+        enemies.forEach((enemy) => {
+          minimapCtx.fillStyle = enemy.color;
+          minimapCtx.beginPath();
+          minimapCtx.arc(
+            enemy.x * scaleFactor,
+            enemy.y * scaleFactor,
+            2,
+            0,
+            Math.PI * 2
+          );
+          minimapCtx.fill();
+        });
+      }
 
-function moveBubbles() {
-    bubbles.forEach((bubble, index) => {
-        bubble.x += bubble.dx;
-        bubble.y += bubble.dy;
-        
-        if (bubble.x < 0 || bubble.x > canvas.width || bubble.y < 0 || bubble.y > canvas.height) {
+      function moveEnemies() {
+        enemies.forEach((enemy) => {
+          const dx = player.x - enemy.x;
+          const dy = player.y - enemy.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          enemy.x += (dx / distance) * enemy.speed;
+          enemy.y += (dy / distance) * enemy.speed;
+        });
+      }
+
+      function moveBubbles() {
+        bubbles.forEach((bubble, index) => {
+          bubble.x += bubble.dx;
+          bubble.y += bubble.dy;
+
+          if (
+            bubble.x < 0 ||
+            bubble.x > canvas.width ||
+            bubble.y < 0 ||
+            bubble.y > canvas.height
+          ) {
             bubbles.splice(index, 1);
-        }
-    });
-}
+          }
+        });
+      }
 
-function checkCollisions() {
-    enemies.forEach((enemy, index) => {
-        const dx = player.x - enemy.x;
-        const dy = player.y - enemy.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < player.radius + enemy.radius) {
+      function checkCollisions() {
+        enemies.forEach((enemy, index) => {
+          const dx = player.x - enemy.x;
+          const dy = player.y - enemy.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < player.radius + enemy.radius) {
             hp -= 10;
             enemies.splice(index, 1);
             updateHUD();
-            
+
             if (hp <= 0) {
-                alert('Game Over! Your final score: ' + score);
-                resetGame();
+              alert("Game Over! Your final score: " + score);
+              resetGame();
             }
-        }
-        
-        bubbles.forEach((bubble, bubbleIndex) => {
+          }
+
+          bubbles.forEach((bubble, bubbleIndex) => {
             const bubbleDx = bubble.x - enemy.x;
             const bubbleDy = bubble.y - enemy.y;
-            const bubbleDistance = Math.sqrt(bubbleDx * bubbleDx + bubbleDy * bubbleDy);
-            
+            const bubbleDistance = Math.sqrt(
+              bubbleDx * bubbleDx + bubbleDy * bubbleDy
+            );
+
             if (bubbleDistance < bubble.radius + enemy.radius) {
-                score += 10;
-                enemies.splice(index, 1);
-                bubbles.splice(bubbleIndex, 1);
-                updateHUD();
+              score += 10;
+              enemies.splice(index, 1);
+              bubbles.splice(bubbleIndex, 1);
+              updateHUD();
             }
+          });
         });
-    });
-}
+      }
 
-function shootBubble(e) {
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    
-    const dx = mouseX - player.x;
-    const dy = mouseY - player.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    
-    const bubble = {
-        x: player.x,
-        y: player.y,
-        radius: player.bubbleSize,
-        dx: (dx / distance) * 7,
-        dy: (dy / distance) * 7
-    };
-    
-    bubbles.push(bubble);
-}
+      function shootBubble(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
 
-function updateHUD() {
-    document.getElementById('level').textContent = level;
-    document.getElementById('score').textContent = score;
-    document.getElementById('hp').textContent = hp;
-}
+        const dx = mouseX - player.x;
+        const dy = mouseY - player.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
-function resetGame() {
-    player.x = canvas.width / 2;
-    player.y = canvas.height / 2;
-    enemies = [];
-    bubbles = [];
-    score = 0;
-    level = 1;
-    hp = 100;
-    updateHUD();
-}
+        const bubble = {
+          x: player.x,
+          y: player.y,
+          radius: player.bubbleSize,
+          dx: (dx / distance) * 7,
+          dy: (dy / distance) * 7,
+        };
 
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    if (enemies.length < 5 + level) {
-        enemies.push(createEnemy());
-    }
-    
-    moveEnemies();
-    moveBubbles();
-    checkCollisions();
-    
-    drawPlayer();
-    drawEnemies();
-    drawBubbles();
-    updateMinimap();
-    
-    requestAnimationFrame(gameLoop);
-}
+        bubbles.push(bubble);
+      }
 
-function upgradeFiringRate() {
-    if (score >= 100) {
-        player.firingRate *= 0.9;
-        score -= 100;
+      function updateHUD() {
+        document.getElementById("level").textContent = level;
+        document.getElementById("score").textContent = score;
+        document.getElementById("hp").textContent = hp;
+      }
+
+      function resetGame() {
+        player.x = canvas.width / 2;
+        player.y = canvas.height / 2;
+        enemies = [];
+        bubbles = [];
+        score = 0;
+        level = 1;
+        hp = 100;
         updateHUD();
-    }
-}
+      }
 
-function upgradeBubbleSize() {
-    if (score >= 150) {
-        player.bubbleSize += 2;
-        score -= 150;
-        updateHUD();
-    }
-}
+      function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-function upgradeSpeed() {
-    if (score >= 200) {
-        player.speed += 1;
-        score -= 200;
-        updateHUD();
-    }
-}
+        if (enemies.length < 5 + level) {
+          enemies.push(createEnemy());
+        }
 
-window.addEventListener('resize', resizeCanvas);
-canvas.addEventListener('click', shootBubble);
-window.addEventListener('keydown', (e) => {
-    switch(e.key) {
-        case 'ArrowUp':
-        case 'w':
+        moveEnemies();
+        moveBubbles();
+        checkCollisions();
+
+        drawPlayer();
+        drawEnemies();
+        drawBubbles();
+        updateMinimap();
+
+        requestAnimationFrame(gameLoop);
+      }
+
+      function upgradeFiringRate() {
+        if (score >= 100) {
+          player.firingRate *= 0.9;
+          score -= 100;
+          updateHUD();
+        }
+      }
+
+      function upgradeBubbleSize() {
+        if (score >= 150) {
+          player.bubbleSize += 2;
+          score -= 150;
+          updateHUD();
+        }
+      }
+
+      function upgradeSpeed() {
+        if (score >= 200) {
+          player.speed += 1;
+          score -= 200;
+          updateHUD();
+        }
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+      canvas.addEventListener("click", shootBubble);
+      window.addEventListener("keydown", (e) => {
+        switch (e.key) {
+          case "ArrowUp":
+          case "w":
             player.y -= player.speed;
             break;
-        case 'ArrowDown':
-        case 's':
+          case "ArrowDown":
+          case "s":
             player.y += player.speed;
             break;
-        case 'ArrowLeft':
-        case 'a':
+          case "ArrowLeft":
+          case "a":
             player.x -= player.speed;
             break;
-        case 'ArrowRight':
-        case 'd':
+          case "ArrowRight":
+          case "d":
             player.x += player.speed;
             break;
-        case 'u':
-            document.getElementById('upgrade-menu').style.display = 'block';
+          case "u":
+            document.getElementById("upgrade-menu").style.display = "block";
             break;
-    }
-});
+        }
+      });
 
-resizeCanvas();
-resetGame();
-gameLoop();
-</script>
-</body></html>
+      resizeCanvas();
+      resetGame();
+      gameLoop();
+    </script>
+  </body>
+</html>

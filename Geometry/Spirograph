@@ -1,4 +1,6 @@
-<html><head><base href="https://graeycowl.github.io/">
+<html>
+  <head>
+    <base href="https://graeycowl.github.io/" />
     <title>WebSim Spirograph Creator</title>
     <style>
       body {
@@ -87,155 +89,173 @@
         color: #4a90e2;
       }
     </style>
-    </head>
-    <body>
-      <header>
-        <h1>WebSim Spirograph Creator</h1>
-      </header>
-      <main>
-        <div id="canvas-container">
-          <canvas id="spirograph"></canvas>
-          <button id="fullscreen-btn">Fullscreen</button>
-          <div id="loading">Loading...</div>
-        </div>
-        <div id="controls">
-          <h2>Controls</h2>
-          <label for="outer-radius">Outer Radius: <span id="outer-radius-value">100</span></label>
-          <input type="range" id="outer-radius" min="50" max="200" value="100">
-          
-          <label for="inner-radius">Inner Radius: <span id="inner-radius-value">50</span></label>
-          <input type="range" id="inner-radius" min="10" max="100" value="50">
-          
-          <label for="offset">Offset: <span id="offset-value">80</span></label>
-          <input type="range" id="offset" min="0" max="100" value="80">
-          
-          <label for="speed">Speed: <span id="speed-value">1</span></label>
-          <input type="range" id="speed" min="0.1" max="5" value="1" step="0.1">
-          
-          <label for="line-width">Line Width: <span id="line-width-value">1</span></label>
-          <input type="range" id="line-width" min="1" max="10" value="1">
-          
-          <button id="color-toggle">Toggle Rainbow Mode</button>
-          <button id="clear">Clear Canvas</button>
-          <button id="save">Save as Image</button>
-        </div>
-      </main>
-      <footer>
-        <p>&copy; 2023 WebSim Spirograph Creator - Explore infinite mathematical beauty</p>
-      </footer>
-    
-      <script>
-        const canvas = document.getElementById('spirograph');
-        const ctx = canvas.getContext('2d');
-        const outerRadiusInput = document.getElementById('outer-radius');
-        const innerRadiusInput = document.getElementById('inner-radius');
-        const offsetInput = document.getElementById('offset');
-        const speedInput = document.getElementById('speed');
-        const lineWidthInput = document.getElementById('line-width');
-        const colorToggle = document.getElementById('color-toggle');
-        const clearButton = document.getElementById('clear');
-        const saveButton = document.getElementById('save');
-        const fullscreenButton = document.getElementById('fullscreen-btn');
-        const loadingIndicator = document.getElementById('loading');
-    
-        let outerRadius = 100;
-        let innerRadius = 50;
-        let offset = 80;
-        let speed = 1;
-        let lineWidth = 1;
-        let angle = 0;
-        let isRainbowMode = false;
-        let hue = 0;
-        let isDrawing = false;
-    
-        function updateCanvasSize() {
-          canvas.width = canvas.offsetWidth;
-          canvas.height = canvas.offsetHeight;
+  </head>
+  <body>
+    <header>
+      <h1>WebSim Spirograph Creator</h1>
+    </header>
+    <main>
+      <div id="canvas-container">
+        <canvas id="spirograph"></canvas>
+        <button id="fullscreen-btn">Fullscreen</button>
+        <div id="loading">Loading...</div>
+      </div>
+      <div id="controls">
+        <h2>Controls</h2>
+        <label for="outer-radius"
+          >Outer Radius: <span id="outer-radius-value">100</span></label
+        >
+        <input type="range" id="outer-radius" min="50" max="200" value="100" />
+
+        <label for="inner-radius"
+          >Inner Radius: <span id="inner-radius-value">50</span></label
+        >
+        <input type="range" id="inner-radius" min="10" max="100" value="50" />
+
+        <label for="offset">Offset: <span id="offset-value">80</span></label>
+        <input type="range" id="offset" min="0" max="100" value="80" />
+
+        <label for="speed">Speed: <span id="speed-value">1</span></label>
+        <input type="range" id="speed" min="0.1" max="5" value="1" step="0.1" />
+
+        <label for="line-width"
+          >Line Width: <span id="line-width-value">1</span></label
+        >
+        <input type="range" id="line-width" min="1" max="10" value="1" />
+
+        <button id="color-toggle">Toggle Rainbow Mode</button>
+        <button id="clear">Clear Canvas</button>
+        <button id="save">Save as Image</button>
+      </div>
+    </main>
+    <footer>
+      <p>
+        &copy; 2023 WebSim Spirograph Creator - Explore infinite mathematical
+        beauty
+      </p>
+    </footer>
+
+    <script>
+      const canvas = document.getElementById("spirograph");
+      const ctx = canvas.getContext("2d");
+      const outerRadiusInput = document.getElementById("outer-radius");
+      const innerRadiusInput = document.getElementById("inner-radius");
+      const offsetInput = document.getElementById("offset");
+      const speedInput = document.getElementById("speed");
+      const lineWidthInput = document.getElementById("line-width");
+      const colorToggle = document.getElementById("color-toggle");
+      const clearButton = document.getElementById("clear");
+      const saveButton = document.getElementById("save");
+      const fullscreenButton = document.getElementById("fullscreen-btn");
+      const loadingIndicator = document.getElementById("loading");
+
+      let outerRadius = 100;
+      let innerRadius = 50;
+      let offset = 80;
+      let speed = 1;
+      let lineWidth = 1;
+      let angle = 0;
+      let isRainbowMode = false;
+      let hue = 0;
+      let isDrawing = false;
+
+      function updateCanvasSize() {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+      }
+
+      function startDrawing() {
+        if (isDrawing) return;
+        isDrawing = true;
+        loadingIndicator.style.display = "none";
+        drawSpirograph();
+      }
+
+      function drawSpirograph() {
+        if (!isDrawing) return;
+
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+
+        const x =
+          centerX +
+          (outerRadius - innerRadius) * Math.cos(angle) +
+          offset *
+            Math.cos(((outerRadius - innerRadius) / innerRadius) * angle);
+        const y =
+          centerY +
+          (outerRadius - innerRadius) * Math.sin(angle) -
+          offset *
+            Math.sin(((outerRadius - innerRadius) / innerRadius) * angle);
+
+        if (isRainbowMode) {
+          ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+          hue = (hue + 1) % 360;
+        } else {
+          ctx.strokeStyle = "#4a90e2";
         }
-    
-        function startDrawing() {
-          if (isDrawing) return;
-          isDrawing = true;
-          loadingIndicator.style.display = 'none';
-          drawSpirograph();
+
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+
+        angle += speed * 0.02;
+        requestAnimationFrame(drawSpirograph);
+      }
+
+      function updateValues() {
+        outerRadius = parseInt(outerRadiusInput.value);
+        innerRadius = parseInt(innerRadiusInput.value);
+        offset = parseInt(offsetInput.value);
+        speed = parseFloat(speedInput.value);
+        lineWidth = parseInt(lineWidthInput.value);
+
+        document.getElementById("outer-radius-value").textContent = outerRadius;
+        document.getElementById("inner-radius-value").textContent = innerRadius;
+        document.getElementById("offset-value").textContent = offset;
+        document.getElementById("speed-value").textContent = speed;
+        document.getElementById("line-width-value").textContent = lineWidth;
+      }
+
+      outerRadiusInput.addEventListener("input", updateValues);
+      innerRadiusInput.addEventListener("input", updateValues);
+      offsetInput.addEventListener("input", updateValues);
+      speedInput.addEventListener("input", updateValues);
+      lineWidthInput.addEventListener("input", updateValues);
+
+      colorToggle.addEventListener("click", () => {
+        isRainbowMode = !isRainbowMode;
+      });
+
+      clearButton.addEventListener("click", () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      });
+
+      saveButton.addEventListener("click", () => {
+        const link = document.createElement("a");
+        link.download = "spirograph.png";
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+
+      fullscreenButton.addEventListener("click", () => {
+        if (canvas.requestFullscreen) {
+          canvas.requestFullscreen();
+        } else if (canvas.webkitRequestFullscreen) {
+          canvas.webkitRequestFullscreen();
+        } else if (canvas.msRequestFullscreen) {
+          canvas.msRequestFullscreen();
         }
-    
-        function drawSpirograph() {
-          if (!isDrawing) return;
-    
-          const centerX = canvas.width / 2;
-          const centerY = canvas.height / 2;
-    
-          const x = centerX + (outerRadius - innerRadius) * Math.cos(angle) + offset * Math.cos(((outerRadius - innerRadius) / innerRadius) * angle);
-          const y = centerY + (outerRadius - innerRadius) * Math.sin(angle) - offset * Math.sin(((outerRadius - innerRadius) / innerRadius) * angle);
-    
-          if (isRainbowMode) {
-            ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
-            hue = (hue + 1) % 360;
-          } else {
-            ctx.strokeStyle = '#4a90e2';
-          }
-    
-          ctx.lineWidth = lineWidth;
-          ctx.lineCap = 'round';
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x, y);
-          ctx.stroke();
-    
-          angle += speed * 0.02;
-          requestAnimationFrame(drawSpirograph);
-        }
-    
-        function updateValues() {
-          outerRadius = parseInt(outerRadiusInput.value);
-          innerRadius = parseInt(innerRadiusInput.value);
-          offset = parseInt(offsetInput.value);
-          speed = parseFloat(speedInput.value);
-          lineWidth = parseInt(lineWidthInput.value);
-    
-          document.getElementById('outer-radius-value').textContent = outerRadius;
-          document.getElementById('inner-radius-value').textContent = innerRadius;
-          document.getElementById('offset-value').textContent = offset;
-          document.getElementById('speed-value').textContent = speed;
-          document.getElementById('line-width-value').textContent = lineWidth;
-        }
-    
-        outerRadiusInput.addEventListener('input', updateValues);
-        innerRadiusInput.addEventListener('input', updateValues);
-        offsetInput.addEventListener('input', updateValues);
-        speedInput.addEventListener('input', updateValues);
-        lineWidthInput.addEventListener('input', updateValues);
-    
-        colorToggle.addEventListener('click', () => {
-          isRainbowMode = !isRainbowMode;
-        });
-    
-        clearButton.addEventListener('click', () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        });
-    
-        saveButton.addEventListener('click', () => {
-          const link = document.createElement('a');
-          link.download = 'spirograph.png';
-          link.href = canvas.toDataURL();
-          link.click();
-        });
-    
-        fullscreenButton.addEventListener('click', () => {
-          if (canvas.requestFullscreen) {
-            canvas.requestFullscreen();
-          } else if (canvas.webkitRequestFullscreen) {
-            canvas.webkitRequestFullscreen();
-          } else if (canvas.msRequestFullscreen) {
-            canvas.msRequestFullscreen();
-          }
-        });
-    
-        window.addEventListener('resize', updateCanvasSize);
-    
-        updateCanvasSize();
-        updateValues();
-        startDrawing();
-      </script>
-    </body></html>
+      });
+
+      window.addEventListener("resize", updateCanvasSize);
+
+      updateCanvasSize();
+      updateValues();
+      startDrawing();
+    </script>
+  </body>
+</html>
