@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kodi Skin Creator</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1>Kodi Skin Creator</h1>
+      </header>
+
+      <main class="main">
+        <aside class="sidebar">
+          <h2>Tools</h2>
+          <ul>
+            <li><button onclick="createNewSkin()">New Skin</button></li>
+            <li><button onclick="editLayout()">Edit Layout</button></li>
+            <li>
+              <button onclick="customizeColors()">Customize Colors</button>
+            </li>
+            <li><button onclick="exportSkin()">Export Skin</button></li>
+          </ul>
+        </aside>
+
+        <section class="content">
+          <h2>Skin Preview</h2>
+          <div id="skinPreview">
+            <div class="placeHolder">Skin preview functionality to be implemented</div>
+            <!-- Skin preview will be rendered here -->
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p>&copy; 2024 Kodi Skin Creator</p>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
