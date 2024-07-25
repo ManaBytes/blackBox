@@ -17,7 +17,7 @@ function addComponent() {
   const component = EstuaryComponents[type];
   const properties = {};
   component.customizableProperties.forEach((prop) => {
-    properties[prop] = ""; // Default empty value
+    properties[prop] = prop === "label" ? "Sample Text" : "0";
   });
 
   currentComponents.push({ type, properties });
@@ -52,9 +52,11 @@ function updateComponentProperties() {
 }
 
 function updatePreview() {
-  const previewDiv = document.getElementById("skinPreview");
+  const previewDiv = document.getElementById("visualPreview");
   const xmlOutput = document.getElementById("xmlOutput");
   let xmlContent = "";
+
+  previewDiv.innerHTML = "";
 
   currentComponents.forEach((component) => {
     const xml = EstuaryComponents.createComponent(
@@ -62,10 +64,43 @@ function updatePreview() {
       component.properties
     );
     xmlContent += xml + "\n\n";
+
+    const previewElement = document.createElement("div");
+    previewElement.className = `preview-component preview-${component.type}`;
+
+    // Set position and size
+    previewElement.style.left = `${component.properties.left || 0}px`;
+    previewElement.style.top = `${component.properties.top || 0}px`;
+    previewElement.style.width = `${component.properties.width || 100}px`;
+    previewElement.style.height = `${component.properties.height || 50}px`;
+
+    // Set content based on component type
+    switch (component.type) {
+      case "button":
+      case "label":
+        previewElement.textContent =
+          component.properties.label || "Sample Text";
+        break;
+      case "image":
+        previewElement.textContent = "Image";
+        break;
+      case "list":
+        previewElement.textContent = "List";
+        break;
+      case "homeMenu":
+        previewElement.textContent = "Home Menu";
+        break;
+      case "weatherWidget":
+        previewElement.textContent = "Weather";
+        break;
+      case "mediaInfoPanel":
+        previewElement.textContent = "Media Info";
+        break;
+    }
+
+    previewDiv.appendChild(previewElement);
   });
 
-  // For now, we'll just display the XML in the preview
-  previewDiv.textContent = xmlContent;
   xmlOutput.value = xmlContent;
 }
 
