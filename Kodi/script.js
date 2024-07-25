@@ -77,24 +77,41 @@ function updatePreview() {
     // Set content based on component type
     switch (component.type) {
       case "button":
+        previewElement.textContent = component.properties.label || "Button";
+        break;
       case "label":
-        previewElement.textContent =
-          component.properties.label || "Sample Text";
+        previewElement.textContent = component.properties.label || "Label";
         break;
       case "image":
-        previewElement.textContent = "Image";
+        previewElement.innerHTML =
+          '<div style="width: 100%; height: 100%; background: #555; display: flex; align-items: center; justify-content: center;">Image</div>';
         break;
       case "list":
-        previewElement.textContent = "List";
+        previewElement.innerHTML = `
+                    <div style="padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.3);">List Item 1</div>
+                    <div style="padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.3);">List Item 2</div>
+                    <div style="padding: 5px;">List Item 3</div>
+                `;
         break;
       case "homeMenu":
-        previewElement.textContent = "Home Menu";
+        previewElement.innerHTML = `
+                    <div style="padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.3);">Movies</div>
+                    <div style="padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.3);">TV Shows</div>
+                    <div style="padding: 5px;">Music</div>
+                `;
         break;
       case "weatherWidget":
-        previewElement.textContent = "Weather";
+        previewElement.innerHTML = `
+                    <div style="font-size: 18px; margin-bottom: 5px;">☀️ 72°F</div>
+                    <div>Sunny</div>
+                `;
         break;
       case "mediaInfoPanel":
-        previewElement.textContent = "Media Info";
+        previewElement.innerHTML = `
+                    <div style="font-weight: bold; margin-bottom: 5px;">Movie Title</div>
+                    <div>2023 | 2h 15min | Action, Adventure</div>
+                    <div style="margin-top: 5px;">Director: John Doe</div>
+                `;
         break;
     }
 

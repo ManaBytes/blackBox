@@ -55,11 +55,14 @@ body {
 .visual-preview {
   border: 1px solid #ddd;
   padding: 10px;
-  min-height: 300px;
-  margin-bottom: 20px;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
   background-color: #000;
   color: #fff;
   position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
 }
 
 #xmlOutput {
@@ -76,6 +79,7 @@ body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  font-size: 14px;
 }
 
 .preview-button {
@@ -83,10 +87,13 @@ body {
   color: white;
   text-align: center;
   cursor: pointer;
+  border-radius: 5px;
+  padding: 5px 10px;
 }
 
 .preview-label {
   text-align: left;
+  padding: 5px;
 }
 
 .preview-image {
@@ -94,20 +101,61 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-style: italic;
 }
 
 .preview-list {
   background-color: rgba(52, 152, 219, 0.2);
+  flex-direction: column;
+  align-items: stretch;
+  padding: 5px;
+}
+
+.preview-list::before {
+  content: "List Items";
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .preview-home-menu {
   background-color: rgba(231, 76, 60, 0.2);
+  flex-direction: column;
+  align-items: stretch;
+  padding: 5px;
+}
+
+.preview-home-menu::before {
+  content: "Home Menu";
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .preview-weather-widget {
   background-color: rgba(241, 196, 15, 0.2);
+  flex-direction: column;
+  align-items: center;
+  padding: 5px;
+}
+
+.preview-weather-widget::before {
+  content: "☀️ 72°F";
+  font-size: 18px;
+  margin-bottom: 5px;
 }
 
 .preview-media-info-panel {
   background-color: rgba(155, 89, 182, 0.2);
+  flex-direction: column;
+  align-items: stretch;
+  padding: 5px;
+}
+
+.preview-media-info-panel::before {
+  content: "Media Title";
+  font-weight: bold;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 5px;
+  margin-bottom: 5px;
 }
