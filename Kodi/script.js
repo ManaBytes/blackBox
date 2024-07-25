@@ -58,8 +58,7 @@ function updatePreview() {
 
   previewDiv.innerHTML = "";
 
-  let maxRight = 0;
-  let maxBottom = 0;
+  let currentTop = 20; // Start with some padding at the top
 
   currentComponents.forEach((component, index) => {
     const xml = EstuaryComponents.createComponent(
@@ -72,67 +71,92 @@ function updatePreview() {
     previewElement.className = `preview-component preview-${component.type}`;
 
     // Set position and size
-    const left = parseInt(component.properties.left) || 0;
-    const top = parseInt(component.properties.top) || 0;
-    const width = parseInt(component.properties.width) || 100;
+    const left = 20; // Fixed left margin
+    const width = parseInt(component.properties.width) || 300;
     const height = parseInt(component.properties.height) || 50;
 
     previewElement.style.left = `${left}px`;
-    previewElement.style.top = `${top}px`;
+    previewElement.style.top = `${currentTop}px`;
     previewElement.style.width = `${width}px`;
     previewElement.style.height = `${height}px`;
 
-    // Update maxRight and maxBottom
-    maxRight = Math.max(maxRight, left + width);
-    maxBottom = Math.max(maxBottom, top + height);
+    // Update currentTop for the next element
+    currentTop += height + 20; // Add 20px margin between elements
 
-    // Set content based on component type
+    // Set content based on component type (same as before)
     switch (component.type) {
       case "button":
-        previewElement.textContent = component.properties.label || "Button";
+        previewElement.innerHTML = `
+        <div class="button-content">
+          <div class="button-text">${
+            component.properties.label || "Button"
+          }</div>
+        </div>
+      `;
         break;
       case "label":
-        previewElement.textContent = component.properties.label || "Label";
+        previewElement.innerHTML = `
+        <div class="label-content" style="color: ${
+          component.properties.textcolor || "white"
+        }; text-align: ${component.properties.align || "left"};">
+          ${component.properties.label || "Label"}
+        </div>
+      `;
         break;
       case "image":
-        previewElement.innerHTML =
-          '<div style="width: 100%; height: 100%; background: #555; display: flex; align-items: center; justify-content: center;">Image</div>';
+        previewElement.innerHTML = `
+        <div class="image-content" style="background-image: url('/api/placeholder/${width}/${height}'); background-size: cover;">
+        </div>
+      `;
         break;
       case "list":
         previewElement.innerHTML = `
-                    <div style="padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.3);">List Item 1</div>
-                    <div style="padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.3);">List Item 2</div>
-                    <div style="padding: 5px;">List Item 3</div>
-                `;
+        <div class="list-content">
+          <div class="list-item">List Item 1</div>
+          <div class="list-item">List Item 2</div>
+          <div class="list-item">List Item 3</div>
+        </div>
+      `;
         break;
       case "homeMenu":
         previewElement.innerHTML = `
-                    <div style="padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.3);">Movies</div>
-                    <div style="padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.3);">TV Shows</div>
-                    <div style="padding: 5px;">Music</div>
-                `;
+        <div class="home-menu-content">
+          <div class="menu-item">Movies</div>
+          <div class="menu-item">TV Shows</div>
+          <div class="menu-item">Music</div>
+        </div>
+      `;
         break;
       case "weatherWidget":
         previewElement.innerHTML = `
-                    <div style="font-size: 18px; margin-bottom: 5px;">☀️ 72°F</div>
-                    <div>Sunny</div>
-                `;
+        <div class="weather-widget-content">
+          <div class="weather-icon">☀️</div>
+          <div class="weather-info">
+            <div class="temperature">72°F</div>
+            <div class="condition">Sunny</div>
+          </div>
+        </div>
+      `;
         break;
       case "mediaInfoPanel":
         previewElement.innerHTML = `
-                    <div style="font-weight: bold; margin-bottom: 5px;">Movie Title</div>
-                    <div>2023 | 2h 15min | Action, Adventure</div>
-                    <div style="margin-top: 5px;">Director: John Doe</div>
-                `;
+        <div class="media-info-content">
+          <div class="poster" style="background-image: url('/api/placeholder/150/225');"></div>
+          <div class="info">
+            <h3>Movie Title</h3>
+            <p>2023 • 2h 15min</p>
+            <p class="plot">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+          </div>
+        </div>
+      `;
         break;
     }
 
     previewDiv.appendChild(previewElement);
   });
 
-  // Set the preview div's size to accommodate all components
-  previewDiv.style.width = `${maxRight + 20}px`;
-  previewDiv.style.height = `${maxBottom + 20}px`;
+  // Set the preview div's height to accommodate all components
+  previewDiv.style.height = `${currentTop + 20}px`; // Add some padding at the bottom
 
   xmlOutput.value = xmlContent;
 }
