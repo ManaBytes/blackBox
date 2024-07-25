@@ -59,6 +59,7 @@ function updatePreview() {
   previewDiv.innerHTML = "";
 
   let currentTop = 20; // Start with some padding at the top
+  let maxWidth = 300; // Default width, can be adjusted as needed
 
   currentComponents.forEach((component, index) => {
     const xml = EstuaryComponents.createComponent(
@@ -80,10 +81,13 @@ function updatePreview() {
     previewElement.style.width = `${width}px`;
     previewElement.style.height = `${height}px`;
 
+    // Update maxWidth if necessary
+    maxWidth = Math.max(maxWidth, width + left + 20); // +20 for right margin
+
     // Update currentTop for the next element
     currentTop += height + 20; // Add 20px margin between elements
 
-    // Set content based on component type (same as before)
+    // Set content based on component type
     switch (component.type) {
       case "button":
         previewElement.innerHTML = `
@@ -156,6 +160,7 @@ function updatePreview() {
   });
 
   // Set the preview div's height to accommodate all components
+  previewDiv.style.width = `${maxWidth}px`;
   previewDiv.style.height = `${currentTop + 20}px`; // Add some padding at the bottom
 
   xmlOutput.value = xmlContent;
