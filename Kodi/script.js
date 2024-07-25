@@ -58,7 +58,10 @@ function updatePreview() {
 
   previewDiv.innerHTML = "";
 
-  currentComponents.forEach((component) => {
+  let maxRight = 0;
+  let maxBottom = 0;
+
+  currentComponents.forEach((component, index) => {
     const xml = EstuaryComponents.createComponent(
       component.type,
       component.properties
@@ -69,10 +72,19 @@ function updatePreview() {
     previewElement.className = `preview-component preview-${component.type}`;
 
     // Set position and size
-    previewElement.style.left = `${component.properties.left || 0}px`;
-    previewElement.style.top = `${component.properties.top || 0}px`;
-    previewElement.style.width = `${component.properties.width || 100}px`;
-    previewElement.style.height = `${component.properties.height || 50}px`;
+    const left = parseInt(component.properties.left) || 0;
+    const top = parseInt(component.properties.top) || 0;
+    const width = parseInt(component.properties.width) || 100;
+    const height = parseInt(component.properties.height) || 50;
+
+    previewElement.style.left = `${left}px`;
+    previewElement.style.top = `${top}px`;
+    previewElement.style.width = `${width}px`;
+    previewElement.style.height = `${height}px`;
+
+    // Update maxRight and maxBottom
+    maxRight = Math.max(maxRight, left + width);
+    maxBottom = Math.max(maxBottom, top + height);
 
     // Set content based on component type
     switch (component.type) {
@@ -117,6 +129,10 @@ function updatePreview() {
 
     previewDiv.appendChild(previewElement);
   });
+
+  // Set the preview div's size to accommodate all components
+  previewDiv.style.width = `${maxRight + 20}px`;
+  previewDiv.style.height = `${maxBottom + 20}px`;
 
   xmlOutput.value = xmlContent;
 }
