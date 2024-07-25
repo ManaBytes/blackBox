@@ -14,23 +14,18 @@
 
       <main class="main">
         <aside class="sidebar">
-          <h2>Tools</h2>
-          <ul>
-            <li><button onclick="createNewSkin()">New Skin</button></li>
-            <li><button onclick="editLayout()">Edit Layout</button></li>
-            <li>
-              <button onclick="customizeColors()">Customize Colors</button>
-            </li>
-            <li><button onclick="exportSkin()">Export Skin</button></li>
-          </ul>
+          <h2>Components</h2>
+          <select id="componentSelect">
+            <option value="">Select a component</option>
+          </select>
+          <button onclick="addComponent()">Add Component</button>
+          <div id="componentProperties"></div>
         </aside>
 
         <section class="content">
           <h2>Skin Preview</h2>
-          <div id="skinPreview">
-            <div class="placeHolder">Skin preview functionality to be implemented</div>
-            <!-- Skin preview will be rendered here -->
-          </div>
+          <div id="skinPreview"></div>
+          <textarea id="xmlOutput" rows="10" cols="50" readonly></textarea>
         </section>
       </main>
 
@@ -39,6 +34,7 @@
       </footer>
     </div>
 
+    <script src="estuary-components.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
