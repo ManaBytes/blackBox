@@ -63,6 +63,23 @@ body {
   overflow: auto;
   margin-bottom: 20px;
   font-family: Arial, sans-serif;
+  user-select: none; /* Prevent text selection while dragging */
+}
+
+.visual-preview.edit-mode {
+  background-color: rgba(0, 0, 0, 0.8); /* Darken the background in edit mode */
+}
+
+.edit-mode .preview-component {
+  cursor: move;
+}
+
+.edit-mode .preview-component:hover {
+  box-shadow: 0 0 0 2px #3498db; /* Highlight on hover in edit mode */
+}
+
+.edit-mode .preview-component:active {
+  box-shadow: 0 0 0 2px #e74c3c; /* Highlight while dragging */
 }
 
 .preview-component {
@@ -73,6 +90,7 @@ body {
   font-size: 14px;
   min-width: 50px;
   min-height: 30px;
+  transition: box-shadow 0.3s ease;
 }
 
 .preview-button {
