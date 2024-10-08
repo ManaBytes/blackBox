@@ -8,42 +8,39 @@ const inputs = document.querySelectorAll('input[type="number"], input[type="colo
 
 let animationId = null;
 let currentIteration = 0;
-let patternCount = 0;
 let isPlaying = false;
 
-function drawSpirograph(outerRadius, innerRadius, offset, iterations, color) {
+function drawSpirograph(outerRadius, innerRadius, offset, baseColor) {
   const x0 = canvas.width / 2;
   const y0 = canvas.height / 2;
   
   ctx.beginPath();
-  ctx.strokeStyle = color;
 
-  for (let i = 0; i <= currentIteration; i++) {
-    const t = (i / iterations) * Math.PI * 2;
+  if (currentIteration === 0) {
+    const t = 0;
+    const x = (outerRadius - innerRadius) * Math.cos(t) + offset * Math.cos((outerRadius - innerRadius) * t / innerRadius);
+    const y = (outerRadius - innerRadius) * Math.sin(t) - offset * Math.sin((outerRadius - innerRadius) * t / innerRadius);
+    ctx.moveTo(x0 + x, y0 + y);
+  }
+
+  for (let i = 0; i < 100; i++) { // Draw 100 points per frame
+    currentIteration++;
+    const t = (currentIteration / 1000) * Math.PI * 2; // Adjust 1000 to change the density of the pattern
     const x = (outerRadius - innerRadius) * Math.cos(t) + offset * Math.cos((outerRadius - innerRadius) * t / innerRadius);
     const y = (outerRadius - innerRadius) * Math.sin(t) - offset * Math.sin((outerRadius - innerRadius) * t / innerRadius);
     
-    if (i === 0) {
-      ctx.moveTo(x0 + x, y0 + y);
-    } else {
-      ctx.lineTo(x0 + x, y0 + y);
-    }
+    // Calculate color based on currentIteration
+    const hue = (currentIteration / 10) % 360;
+    ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+    
+    ctx.lineTo(x0 + x, y0 + y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x0 + x, y0 + y);
   }
 
-  ctx.stroke();
-
-  if (currentIteration < iterations) {
-    currentIteration += 5; // Adjust this value to change the drawing speed
-    animationId = requestAnimationFrame(() => drawSpirograph(outerRadius, innerRadius, offset, iterations, color));
-  } else {
-    // Start a new spirograph with slightly different parameters
-    patternCount++;
-    currentIteration = 0;
-    const newOuterRadius = outerRadius + Math.sin(patternCount * 0.1) * 10;
-    const newInnerRadius = innerRadius + Math.cos(patternCount * 0.1) * 5;
-    const newOffset = offset + Math.sin(patternCount * 0.2) * 3;
-    const newColor = `hsl(${patternCount * 10 % 360}, 100%, 50%)`;
-    animationId = requestAnimationFrame(() => drawSpirograph(newOuterRadius, newInnerRadius, newOffset, iterations, newColor));
+  if (isPlaying) {
+    animationId = requestAnimationFrame(() => drawSpirograph(outerRadius, innerRadius, offset, baseColor));
   }
 }
 
@@ -51,7 +48,6 @@ function setDefaultValues() {
   document.getElementById("outerRadius").value = 200;
   document.getElementById("innerRadius").value = 100;
   document.getElementById("offset").value = 80;
-  document.getElementById("iterations").value = 1000;
   document.getElementById("color").value = "#ff0000";
   
   startAnimation();
@@ -65,10 +61,9 @@ function startAnimation() {
   const outerRadius = parseInt(document.getElementById("outerRadius").value);
   const innerRadius = parseInt(document.getElementById("innerRadius").value);
   const offset = parseInt(document.getElementById("offset").value);
-  const iterations = parseInt(document.getElementById("iterations").value);
-  const color = document.getElementById("color").value;
+  const baseColor = document.getElementById("color").value;
 
-  drawSpirograph(outerRadius, innerRadius, offset, iterations, color);
+  drawSpirograph(outerRadius, innerRadius, offset, baseColor);
 }
 
 function clearCanvas() {
@@ -77,7 +72,6 @@ function clearCanvas() {
     cancelAnimationFrame(animationId);
   }
   currentIteration = 0;
-  patternCount = 0;
   isPlaying = false;
   updatePlayPauseButton();
 }
