@@ -1,33 +1,37 @@
 const canvas = document.getElementById("spirographCanvas");
 const ctx = canvas.getContext("2d");
-const generateBtn = document.getElementById("generate");
 const defaultBtn = document.getElementById("default");
+const onRadio = document.getElementById("on");
+const offRadio = document.getElementById("off");
+
+let animationId = null;
+let currentIteration = 0;
 
 function drawSpirograph(outerRadius, innerRadius, offset, iterations, color) {
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
-
+  const x0 = canvas.width / 2;
+  const y0 = canvas.height / 2;
+  
   ctx.beginPath();
   ctx.strokeStyle = color;
-  ctx.lineWidth = 2;
 
-  for (let i = 0; i <= iterations; i++) {
+  for (let i = 0; i <= currentIteration; i++) {
     const t = (i / iterations) * Math.PI * 2;
-    const x =
-      (outerRadius - innerRadius) * Math.cos(t) +
-      offset * Math.cos(((outerRadius - innerRadius) * t) / innerRadius);
-    const y =
-      (outerRadius - innerRadius) * Math.sin(t) -
-      offset * Math.sin(((outerRadius - innerRadius) * t) / innerRadius);
-
+    const x = (outerRadius - innerRadius) * Math.cos(t) + offset * Math.cos((outerRadius - innerRadius) * t / innerRadius);
+    const y = (outerRadius - innerRadius) * Math.sin(t) - offset * Math.sin((outerRadius - innerRadius) * t / innerRadius);
+    
     if (i === 0) {
-      ctx.moveTo(centerX + x, centerY + y);
+      ctx.moveTo(x0 + x, y0 + y);
     } else {
-      ctx.lineTo(centerX + x, centerY + y);
+      ctx.lineTo(x0 + x, y0 + y);
     }
   }
 
   ctx.stroke();
+
+  if (currentIteration < iterations) {
+    currentIteration += 5; // Adjust this value to change the drawing speed
+    animationId = requestAnimationFrame(() => drawSpirograph(outerRadius, innerRadius, offset, iterations, color));
+  }
 }
 
 function setDefaultValues() {
@@ -36,12 +40,18 @@ function setDefaultValues() {
   document.getElementById("offset").value = 80;
   document.getElementById("iterations").value = 1000;
   document.getElementById("color").value = "#ff0000";
-
-  // Generate spirograph with default values
-  handleGenerate();
+  
+  if (onRadio.checked) {
+    startAnimation();
+  }
 }
 
-function handleGenerate() {
+function startAnimation() {
+  // Stop any ongoing animation
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+  }
+
   const outerRadius = parseInt(document.getElementById("outerRadius").value);
   const innerRadius = parseInt(document.getElementById("innerRadius").value);
   const offset = parseInt(document.getElementById("offset").value);
@@ -51,12 +61,25 @@ function handleGenerate() {
   // Clear previous drawing
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Draw new spirograph
+  // Reset iteration counter
+  currentIteration = 0;
+
+  // Start new animation
   drawSpirograph(outerRadius, innerRadius, offset, iterations, color);
 }
 
-generateBtn.addEventListener("click", handleGenerate);
 defaultBtn.addEventListener("click", setDefaultValues);
+onRadio.addEventListener("change", function() {
+  if (this.checked) {
+    startAnimation();
+  }
+});
+
+offRadio.addEventListener("change", function() {
+  if (this.checked && animationId) {
+    cancelAnimationFrame(animationId);
+  }
+});
 
 // Set initial canvas size
 function resizeCanvas() {
@@ -72,5 +95,5 @@ window.addEventListener("resize", () => {
   handleGenerate();
 });
 
-// Initial draw with default values
+// Initial setup
 setDefaultValues();

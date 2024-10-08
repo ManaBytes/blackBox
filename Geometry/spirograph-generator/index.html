@@ -25,7 +25,13 @@
       <input type="color" id="color" value="#ff0000" />
 
       <button id="default">Default</button>
-      <button id="generate">Generate Spirograph</button>
+
+      <div class="radio-group">
+        <input type="radio" id="off" name="animation" value="off" checked />
+        <label for="off">Off</label>
+        <input type="radio" id="on" name="animation" value="on" />
+        <label for="on">On</label>
+      </div>
     </div>
     <canvas id="spirographCanvas"></canvas>
     <script src="script.js"></script>
