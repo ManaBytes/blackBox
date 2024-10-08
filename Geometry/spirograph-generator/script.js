@@ -16,18 +16,22 @@ function drawSpirograph(outerRadius, innerRadius, offset, baseColor) {
   
   ctx.beginPath();
 
+  // Pre-calculate constant values
+  const radiusDiff = outerRadius - innerRadius;
+  const radiusRatio = radiusDiff / innerRadius;
+
   if (currentIteration === 0) {
     const t = 0;
-    const x = (outerRadius - innerRadius) * Math.cos(t) + offset * Math.cos((outerRadius - innerRadius) * t / innerRadius);
-    const y = (outerRadius - innerRadius) * Math.sin(t) - offset * Math.sin((outerRadius - innerRadius) * t / innerRadius);
+    const x = radiusDiff * Math.cos(t) + offset * Math.cos(radiusRatio * t);
+    const y = radiusDiff * Math.sin(t) - offset * Math.sin(radiusRatio * t);
     ctx.moveTo(x0 + x, y0 + y);
   }
 
   for (let i = 0; i < 100; i++) { // Draw 100 points per frame
     currentIteration++;
     const t = (currentIteration / 1000) * Math.PI * 2; // Adjust 1000 to change the density of the pattern
-    const x = (outerRadius - innerRadius) * Math.cos(t) + offset * Math.cos((outerRadius - innerRadius) * t / innerRadius);
-    const y = (outerRadius - innerRadius) * Math.sin(t) - offset * Math.sin((outerRadius - innerRadius) * t / innerRadius);
+    const x = radiusDiff * Math.cos(t) + offset * Math.cos(radiusRatio * t);
+    const y = radiusDiff * Math.sin(t) - offset * Math.sin(radiusRatio * t);
     
     // Calculate color based on currentIteration
     const hue = (currentIteration / 10) % 360;
