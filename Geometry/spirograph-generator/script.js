@@ -5,6 +5,8 @@ const clearBtn = document.getElementById("clear");
 const onRadio = document.getElementById("on");
 const offRadio = document.getElementById("off");
 
+const inputs = document.querySelectorAll('input[type="number"], input[type="color"]');
+
 let animationId = null;
 let currentIteration = 0;
 
@@ -42,13 +44,10 @@ function setDefaultValues() {
   document.getElementById("iterations").value = 1000;
   document.getElementById("color").value = "#ff0000";
   
-  if (onRadio.checked) {
-    startAnimation();
-  }
+  startAnimation();
 }
 
 function startAnimation() {
-  // Stop any ongoing animation
   if (animationId) {
     cancelAnimationFrame(animationId);
   }
@@ -59,27 +58,30 @@ function startAnimation() {
   const iterations = parseInt(document.getElementById("iterations").value);
   const color = document.getElementById("color").value;
 
-  // Reset iteration counter
   currentIteration = 0;
-
-  // Start new animation
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawSpirograph(outerRadius, innerRadius, offset, iterations, color);
 }
 
 function clearCanvas() {
-  // Clear the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // Stop any ongoing animation
   if (animationId) {
     cancelAnimationFrame(animationId);
   }
-  
-  // Reset iteration counter
   currentIteration = 0;
-  
-  // Set radio button to "Off"
   offRadio.checked = true;
+}
+
+function resizeCanvas() {
+  const containerWidth = canvas.parentElement.clientWidth;
+  const containerHeight = window.innerHeight - document.getElementById("controls").offsetHeight - 20;
+  
+  canvas.width = containerWidth;
+  canvas.height = containerHeight;
+  
+  if (onRadio.checked) {
+    startAnimation();
+  }
 }
 
 defaultBtn.addEventListener("click", setDefaultValues);
@@ -97,19 +99,16 @@ offRadio.addEventListener("change", function() {
   }
 });
 
-// Set initial canvas size
-function resizeCanvas() {
-  canvas.width = window.innerWidth * 0.8;
-  canvas.height = window.innerHeight * 0.6;
-}
-
-resizeCanvas();
-
-// Redraw on window resize
-window.addEventListener("resize", () => {
-  resizeCanvas();
-  handleGenerate();
+inputs.forEach(input => {
+  input.addEventListener('input', function() {
+    if (onRadio.checked) {
+      startAnimation();
+    }
+  });
 });
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
 
 // Initial setup
 setDefaultValues();
