@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Spirograph Generator</title>
     <link rel="stylesheet" href="style.css" />
+    <style>
+      .control-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+      }
+      .control-button svg {
+        width: 24px;
+        height: 24px;
+      }
+    </style>
   </head>
   <body>
     <h1>Spirograph Generator</h1>
@@ -26,13 +38,12 @@
 
       <button id="default">Default</button>
       <button id="clear">Clear</button>
-
-      <div class="radio-group">
-        <input type="radio" id="off" name="animation" value="off" checked />
-        <label for="off">Off</label>
-        <input type="radio" id="on" name="animation" value="on" />
-        <label for="on">On</label>
-      </div>
+      
+      <button id="playPauseBtn" class="control-button">
+        <svg viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
     </div>
     <canvas id="spirographCanvas"></canvas>
     <script src="script.js"></script>

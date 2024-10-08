@@ -2,13 +2,14 @@ const canvas = document.getElementById("spirographCanvas");
 const ctx = canvas.getContext("2d");
 const defaultBtn = document.getElementById("default");
 const clearBtn = document.getElementById("clear");
-const onRadio = document.getElementById("on");
-const offRadio = document.getElementById("off");
+const playPauseBtn = document.getElementById("playPauseBtn");
 
 const inputs = document.querySelectorAll('input[type="number"], input[type="color"]');
 
 let animationId = null;
 let currentIteration = 0;
+let patternCount = 0;
+let isPlaying = false;
 
 function drawSpirograph(outerRadius, innerRadius, offset, iterations, color) {
   const x0 = canvas.width / 2;
@@ -34,6 +35,15 @@ function drawSpirograph(outerRadius, innerRadius, offset, iterations, color) {
   if (currentIteration < iterations) {
     currentIteration += 5; // Adjust this value to change the drawing speed
     animationId = requestAnimationFrame(() => drawSpirograph(outerRadius, innerRadius, offset, iterations, color));
+  } else {
+    // Start a new spirograph with slightly different parameters
+    patternCount++;
+    currentIteration = 0;
+    const newOuterRadius = outerRadius + Math.sin(patternCount * 0.1) * 10;
+    const newInnerRadius = innerRadius + Math.cos(patternCount * 0.1) * 5;
+    const newOffset = offset + Math.sin(patternCount * 0.2) * 3;
+    const newColor = `hsl(${patternCount * 10 % 360}, 100%, 50%)`;
+    animationId = requestAnimationFrame(() => drawSpirograph(newOuterRadius, newInnerRadius, newOffset, iterations, newColor));
   }
 }
 
@@ -58,8 +68,6 @@ function startAnimation() {
   const iterations = parseInt(document.getElementById("iterations").value);
   const color = document.getElementById("color").value;
 
-  currentIteration = 0;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawSpirograph(outerRadius, innerRadius, offset, iterations, color);
 }
 
@@ -69,39 +77,50 @@ function clearCanvas() {
     cancelAnimationFrame(animationId);
   }
   currentIteration = 0;
-  offRadio.checked = true;
+  patternCount = 0;
+  isPlaying = false;
+  updatePlayPauseButton();
 }
 
 function resizeCanvas() {
   const containerWidth = canvas.parentElement.clientWidth;
   const containerHeight = window.innerHeight - document.getElementById("controls").offsetHeight - 20;
   
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  
   canvas.width = containerWidth;
   canvas.height = containerHeight;
   
-  if (onRadio.checked) {
+  ctx.putImageData(imageData, 0, 0);
+  
+  if (isPlaying) {
     startAnimation();
   }
 }
 
-defaultBtn.addEventListener("click", setDefaultValues);
-clearBtn.addEventListener("click", clearCanvas);
-
-onRadio.addEventListener("change", function() {
-  if (this.checked) {
+function togglePlayPause() {
+  isPlaying = !isPlaying;
+  if (isPlaying) {
     startAnimation();
-  }
-});
-
-offRadio.addEventListener("change", function() {
-  if (this.checked && animationId) {
+  } else {
     cancelAnimationFrame(animationId);
   }
-});
+  updatePlayPauseButton();
+}
+
+function updatePlayPauseButton() {
+  playPauseBtn.innerHTML = isPlaying
+    ? '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+    : '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+}
+
+defaultBtn.addEventListener("click", setDefaultValues);
+clearBtn.addEventListener("click", clearCanvas);
+playPauseBtn.addEventListener("click", togglePlayPause);
 
 inputs.forEach(input => {
   input.addEventListener('input', function() {
-    if (onRadio.checked) {
+    if (isPlaying) {
       startAnimation();
     }
   });
@@ -112,3 +131,4 @@ resizeCanvas();
 
 // Initial setup
 setDefaultValues();
+updatePlayPauseButton();
