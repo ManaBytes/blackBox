@@ -1,6 +1,7 @@
 const canvas = document.getElementById("spirographCanvas");
 const ctx = canvas.getContext("2d");
 const defaultBtn = document.getElementById("default");
+const clearBtn = document.getElementById("clear");
 const onRadio = document.getElementById("on");
 const offRadio = document.getElementById("off");
 
@@ -58,9 +59,6 @@ function startAnimation() {
   const iterations = parseInt(document.getElementById("iterations").value);
   const color = document.getElementById("color").value;
 
-  // Clear previous drawing
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   // Reset iteration counter
   currentIteration = 0;
 
@@ -68,7 +66,25 @@ function startAnimation() {
   drawSpirograph(outerRadius, innerRadius, offset, iterations, color);
 }
 
+function clearCanvas() {
+  // Clear the canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Stop any ongoing animation
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+  }
+  
+  // Reset iteration counter
+  currentIteration = 0;
+  
+  // Set radio button to "Off"
+  offRadio.checked = true;
+}
+
 defaultBtn.addEventListener("click", setDefaultValues);
+clearBtn.addEventListener("click", clearCanvas);
+
 onRadio.addEventListener("change", function() {
   if (this.checked) {
     startAnimation();
