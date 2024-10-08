@@ -1,6 +1,7 @@
 const canvas = document.getElementById("spirographCanvas");
 const ctx = canvas.getContext("2d");
 const generateBtn = document.getElementById("generate");
+const defaultBtn = document.getElementById("default");
 
 function drawSpirograph(outerRadius, innerRadius, offset, iterations, color) {
   const centerX = canvas.width / 2;
@@ -29,6 +30,17 @@ function drawSpirograph(outerRadius, innerRadius, offset, iterations, color) {
   ctx.stroke();
 }
 
+function setDefaultValues() {
+  document.getElementById("outerRadius").value = 200;
+  document.getElementById("innerRadius").value = 100;
+  document.getElementById("offset").value = 80;
+  document.getElementById("iterations").value = 1000;
+  document.getElementById("color").value = "#ff0000";
+
+  // Generate spirograph with default values
+  handleGenerate();
+}
+
 function handleGenerate() {
   const outerRadius = parseInt(document.getElementById("outerRadius").value);
   const innerRadius = parseInt(document.getElementById("innerRadius").value);
@@ -44,6 +56,7 @@ function handleGenerate() {
 }
 
 generateBtn.addEventListener("click", handleGenerate);
+defaultBtn.addEventListener("click", setDefaultValues);
 
 // Set initial canvas size
 function resizeCanvas() {
@@ -59,5 +72,5 @@ window.addEventListener("resize", () => {
   handleGenerate();
 });
 
-// Initial draw
-handleGenerate();
+// Initial draw with default values
+setDefaultValues();
