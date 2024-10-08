@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spirograph Generator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Spirograph Generator</h1>
+    <div id="controls">
+      <label for="outerRadius">Outer Radius:</label>
+      <input type="number" id="outerRadius" value="200" min="50" max="300" />
+
+      <label for="innerRadius">Inner Radius:</label>
+      <input type="number" id="innerRadius" value="100" min="10" max="200" />
+
+      <label for="offset">Offset:</label>
+      <input type="number" id="offset" value="80" min="0" max="200" />
+
+      <label for="iterations">Iterations:</label>
+      <input type="number" id="iterations" value="1000" min="100" max="10000" />
+
+      <label for="color">Color:</label>
+      <input type="color" id="color" value="#ff0000" />
+
+      <button id="generate">Generate Spirograph</button>
+    </div>
+    <canvas id="spirographCanvas"></canvas>
+    <script src="script.js"></script>
+  </body>
+</html>
