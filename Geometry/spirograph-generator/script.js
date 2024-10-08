@@ -58,9 +58,9 @@ function startAnimation() {
     cancelAnimationFrame(animationId);
   }
 
-  const outerRadius = parseInt(document.getElementById("outerRadius").value);
-  const innerRadius = parseInt(document.getElementById("innerRadius").value);
-  const offset = parseInt(document.getElementById("offset").value);
+  const outerRadius = parseFloat(document.getElementById("outerRadius").value);
+  const innerRadius = parseFloat(document.getElementById("innerRadius").value);
+  const offset = parseFloat(document.getElementById("offset").value);
   const baseColor = document.getElementById("color").value;
 
   drawSpirograph(outerRadius, innerRadius, offset, baseColor);
