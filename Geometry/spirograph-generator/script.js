@@ -15,6 +15,12 @@ document.addEventListener("DOMContentLoaded", function () {
   let isChangingOffset = false;
   let offsetVisualizerTimeout;
 
+  // Create a temporary canvas for the visualizer
+  const visualizerCanvas = document.createElement("canvas");
+  visualizerCanvas.width = canvas.width;
+  visualizerCanvas.height = canvas.height;
+  const visualizerCtx = visualizerCanvas.getContext("2d");
+
   function drawSpirograph(outerRadius, innerRadius, offset, baseColor) {
     const x0 = canvas.width / 2;
     const y0 = canvas.height / 2;
@@ -56,15 +62,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function drawOffsetVisualizer(outerRadius, innerRadius, offset) {
+  function drawOffsetVisualizer(outerRadius, innerRadius, offset, opacity = 1) {
     const x0 = canvas.width / 2;
     const y0 = canvas.height / 2;
 
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Save the current canvas state
+    ctx.save();
 
-    // Redraw the spirograph
-    ctx.putImageData(ctx.getImageData(0, 0, canvas.width, canvas.height), 0, 0);
+    // Set the global alpha for fading effect
+    ctx.globalAlpha = opacity;
 
     // Draw the outer circle
     ctx.beginPath();
@@ -92,6 +98,9 @@ document.addEventListener("DOMContentLoaded", function () {
     ctx.arc(innerX + offset, innerY, 3, 0, Math.PI * 2);
     ctx.fillStyle = "red";
     ctx.fill();
+
+    // Restore the canvas state
+    ctx.restore();
   }
 
   function setDefaultValues() {
@@ -108,10 +117,6 @@ document.addEventListener("DOMContentLoaded", function () {
       cancelAnimationFrame(animationId);
     }
 
-    if (!isChangingOffset) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
     const outerRadius = parseFloat(
       document.getElementById("outerRadius").value
     );
@@ -122,6 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const baseColor = document.getElementById("color").value;
 
     currentIteration = 0;
+    // Don't clear the canvas here
     drawSpirograph(outerRadius, innerRadius, offset, baseColor);
   }
 
@@ -200,16 +206,40 @@ document.addEventListener("DOMContentLoaded", function () {
     const offset = parseFloat(this.value);
 
     isChangingOffset = true;
+
+    // Store the current spirograph
+    const spirographImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    // Draw the offset visualizer
     drawOffsetVisualizer(outerRadius, innerRadius, offset);
 
     clearTimeout(offsetVisualizerTimeout);
     offsetVisualizerTimeout = setTimeout(() => {
       isChangingOffset = false;
-      if (isPlaying) {
-        startAnimation();
-      }
+      // Fade out the visualizer
+      let opacity = 1;
+      const fadeOut = setInterval(() => {
+        if (opacity <= 0) {
+          clearInterval(fadeOut);
+          // Restore the original spirograph without the visualizer
+          ctx.putImageData(spirographImage, 0, 0);
+          // If playing, continue the animation
+          if (isPlaying) {
+            startAnimation();
+          }
+        } else {
+          opacity -= 0.1;
+          // Clear the canvas
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          // Redraw the original spirograph
+          ctx.putImageData(spirographImage, 0, 0);
+          // Draw the fading visualizer on top
+          drawOffsetVisualizer(outerRadius, innerRadius, offset, opacity);
+        }
+      }, 50);
     }, 500);
 
+    // If playing, update the animation
     if (isPlaying) {
       startAnimation();
     }
