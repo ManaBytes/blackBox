@@ -1,5 +1,5 @@
 // Either alpha stacking or artifacts from drawing on same canvas are causing venus like pattern on the canvas, is supposed to fade away after use as guide filter not persist
-
+// Bad timing, wrong branch noticed though
 document.addEventListener("DOMContentLoaded", function () {
   const canvas = document.getElementById("spirographCanvas");
   const ctx = canvas.getContext("2d");
