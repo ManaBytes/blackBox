@@ -12,9 +12,9 @@ document.addEventListener("DOMContentLoaded", function () {
   let animationId = null;
   let currentIteration = 0;
   let isPlaying = false;
-  let isChangingOffset = false;
-  let offsetVisualizerTimeout;
+  let isUpdating = false;
   let fadeOutInterval;
+  let offsetVisualizerTimeout;
 
   // Create a separate canvas for the visualizer
   const visualizerCanvas = document.createElement("canvas");
@@ -66,63 +66,69 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function drawVisualizer(outerRadius, innerRadius, offset, type, opacity = 1) {
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = visualizerCanvas.width;
+    tempCanvas.height = visualizerCanvas.height;
+    const tempCtx = tempCanvas.getContext("2d");
+
+    const x0 = tempCanvas.width / 2;
+    const y0 = tempCanvas.height / 2;
+
+    tempCtx.globalAlpha = opacity;
+
+    // Draw the outer circle
+    tempCtx.beginPath();
+    tempCtx.arc(x0, y0, outerRadius, 0, Math.PI * 2);
+    tempCtx.strokeStyle = "rgba(200, 200, 200, 0.5)";
+    tempCtx.stroke();
+
+    // Draw the inner circle
+    const innerX = x0 + (outerRadius - innerRadius);
+    const innerY = y0;
+    tempCtx.beginPath();
+    tempCtx.arc(innerX, innerY, innerRadius, 0, Math.PI * 2);
+    tempCtx.strokeStyle = "rgba(150, 150, 150, 0.5)";
+    tempCtx.stroke();
+
+    // Draw the offset line
+    tempCtx.beginPath();
+    tempCtx.moveTo(innerX, innerY);
+    tempCtx.lineTo(innerX + offset, innerY);
+    tempCtx.strokeStyle = "rgba(255, 0, 0, 0.7)";
+    tempCtx.stroke();
+
+    // Draw the tracing point
+    tempCtx.beginPath();
+    tempCtx.arc(innerX + offset, innerY, 3, 0, Math.PI * 2);
+    tempCtx.fillStyle = "red";
+    tempCtx.fill();
+
+    // Highlight specific elements based on the type
+    switch (type) {
+      case "outer":
+        tempCtx.strokeStyle = "rgba(0, 255, 0, 0.7)";
+        tempCtx.beginPath();
+        tempCtx.arc(x0, y0, outerRadius, 0, Math.PI * 2);
+        tempCtx.stroke();
+        break;
+      case "inner":
+        tempCtx.strokeStyle = "rgba(0, 0, 255, 0.7)";
+        tempCtx.beginPath();
+        tempCtx.arc(innerX, innerY, innerRadius, 0, Math.PI * 2);
+        tempCtx.stroke();
+        break;
+      case "offset":
+        // The offset is already highlighted in red
+        break;
+    }
+
     visualizerCtx.clearRect(
       0,
       0,
       visualizerCanvas.width,
       visualizerCanvas.height
     );
-
-    const x0 = visualizerCanvas.width / 2;
-    const y0 = visualizerCanvas.height / 2;
-
-    visualizerCtx.globalAlpha = opacity;
-
-    // Draw the outer circle
-    visualizerCtx.beginPath();
-    visualizerCtx.arc(x0, y0, outerRadius, 0, Math.PI * 2);
-    visualizerCtx.strokeStyle = "rgba(200, 200, 200, 0.5)";
-    visualizerCtx.stroke();
-
-    // Draw the inner circle
-    const innerX = x0 + (outerRadius - innerRadius);
-    const innerY = y0;
-    visualizerCtx.beginPath();
-    visualizerCtx.arc(innerX, innerY, innerRadius, 0, Math.PI * 2);
-    visualizerCtx.strokeStyle = "rgba(150, 150, 150, 0.5)";
-    visualizerCtx.stroke();
-
-    // Draw the offset line
-    visualizerCtx.beginPath();
-    visualizerCtx.moveTo(innerX, innerY);
-    visualizerCtx.lineTo(innerX + offset, innerY);
-    visualizerCtx.strokeStyle = "rgba(255, 0, 0, 0.7)";
-    visualizerCtx.stroke();
-
-    // Draw the tracing point
-    visualizerCtx.beginPath();
-    visualizerCtx.arc(innerX + offset, innerY, 3, 0, Math.PI * 2);
-    visualizerCtx.fillStyle = "red";
-    visualizerCtx.fill();
-
-    // Highlight specific elements based on the type
-    switch (type) {
-      case "outer":
-        visualizerCtx.strokeStyle = "rgba(0, 255, 0, 0.7)";
-        visualizerCtx.beginPath();
-        visualizerCtx.arc(x0, y0, outerRadius, 0, Math.PI * 2);
-        visualizerCtx.stroke();
-        break;
-      case "inner":
-        visualizerCtx.strokeStyle = "rgba(0, 0, 255, 0.7)";
-        visualizerCtx.beginPath();
-        visualizerCtx.arc(innerX, innerY, innerRadius, 0, Math.PI * 2);
-        visualizerCtx.stroke();
-        break;
-      case "offset":
-        // The offset is already highlighted in red
-        break;
-    }
+    visualizerCtx.drawImage(tempCanvas, 0, 0);
   }
 
   function drawOffsetVisualizer(outerRadius, innerRadius, offset, opacity = 1) {
@@ -239,8 +245,6 @@ document.addEventListener("DOMContentLoaded", function () {
   clearBtn.addEventListener("click", clearCanvas);
   playPauseBtn.addEventListener("click", togglePlayPause);
 
-  let isUpdating = false;
-
   inputs.forEach((input) => {
     input.addEventListener("input", function () {
       if (isUpdating) return;
@@ -300,10 +304,9 @@ document.addEventListener("DOMContentLoaded", function () {
               visualizerCanvas.width,
               visualizerCanvas.height
             );
+            // Redraw spirograph only if it's playing
             if (isPlaying) {
               startAnimation();
-            } else {
-              drawSpirograph(outerRadius, innerRadius, offset);
             }
           } else {
             visualizerFunction(outerRadius, innerRadius, offset, opacity);
