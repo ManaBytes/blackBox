@@ -26,3 +26,9 @@ button {
 #spirographCanvas {
   border: 1px solid #ccc;
 }
+
+.control-button svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
