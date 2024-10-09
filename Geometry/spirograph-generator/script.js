@@ -16,10 +16,12 @@ document.addEventListener("DOMContentLoaded", function () {
   let offsetVisualizerTimeout;
   let fadeOutInterval;
 
-  // Create a temporary canvas for the visualizer
+  // Create a separate canvas for the visualizer
   const visualizerCanvas = document.createElement("canvas");
-  visualizerCanvas.width = canvas.width;
-  visualizerCanvas.height = canvas.height;
+  document.body.appendChild(visualizerCanvas); // Add the visualizer canvas to the DOM
+  visualizerCanvas.style.position = "absolute"; // Position it absolutely
+  visualizerCanvas.style.pointerEvents = "none"; // Prevent it from intercepting mouse events
+
   const visualizerCtx = visualizerCanvas.getContext("2d");
 
   function drawSpirograph(outerRadius, innerRadius, offset, baseColor) {
@@ -64,44 +66,46 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function drawOffsetVisualizer(outerRadius, innerRadius, offset, opacity = 1) {
-    const x0 = canvas.width / 2;
-    const y0 = canvas.height / 2;
+    visualizerCtx.clearRect(
+      0,
+      0,
+      visualizerCanvas.width,
+      visualizerCanvas.height
+    );
 
-    // Save the current canvas state
-    ctx.save();
+    const x0 = visualizerCanvas.width / 2;
+    const y0 = visualizerCanvas.height / 2;
 
-    // Set the global alpha for fading effect
-    ctx.globalAlpha = opacity;
+    visualizerCtx.globalAlpha = opacity;
 
     // Draw the outer circle
-    ctx.beginPath();
-    ctx.arc(x0, y0, outerRadius, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(200, 200, 200, 0.5)";
-    ctx.stroke();
+    visualizerCtx.beginPath();
+    visualizerCtx.arc(x0, y0, outerRadius, 0, Math.PI * 2);
+    visualizerCtx.strokeStyle = "rgba(200, 200, 200, 0.5)";
+    visualizerCtx.stroke();
 
     // Draw the inner circle
     const innerX = x0 + (outerRadius - innerRadius);
     const innerY = y0;
-    ctx.beginPath();
-    ctx.arc(innerX, innerY, innerRadius, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(150, 150, 150, 0.5)";
-    ctx.stroke();
+    visualizerCtx.beginPath();
+    visualizerCtx.arc(innerX, innerY, innerRadius, 0, Math.PI * 2);
+    visualizerCtx.strokeStyle = "rgba(150, 150, 150, 0.5)";
+    visualizerCtx.stroke();
 
     // Draw the offset line
-    ctx.beginPath();
-    ctx.moveTo(innerX, innerY);
-    ctx.lineTo(innerX + offset, innerY);
-    ctx.strokeStyle = "rgba(255, 0, 0, 0.7)";
-    ctx.stroke();
+    visualizerCtx.beginPath();
+    visualizerCtx.moveTo(innerX, innerY);
+    visualizerCtx.lineTo(innerX + offset, innerY);
+    visualizerCtx.strokeStyle = "rgba(255, 0, 0, 0.7)";
+    visualizerCtx.stroke();
 
     // Draw the tracing point
-    ctx.beginPath();
-    ctx.arc(innerX + offset, innerY, 3, 0, Math.PI * 2);
-    ctx.fillStyle = "red";
-    ctx.fill();
+    visualizerCtx.beginPath();
+    visualizerCtx.arc(innerX + offset, innerY, 3, 0, Math.PI * 2);
+    visualizerCtx.fillStyle = "red";
+    visualizerCtx.fill();
 
-    // Restore the canvas state
-    ctx.restore();
+    // No need to draw on the main canvas anymore
   }
 
   function setDefaultValues() {
@@ -148,6 +152,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     canvas.width = containerWidth;
     canvas.height = containerHeight;
+
+    // Update visualizer canvas size and position
+    visualizerCanvas.width = canvas.width;
+    visualizerCanvas.height = canvas.height;
+    const canvasRect = canvas.getBoundingClientRect();
+    visualizerCanvas.style.left = `${canvasRect.left}px`;
+    visualizerCanvas.style.top = `${canvasRect.top}px`;
 
     ctx.putImageData(imageData, 0, 0);
 
@@ -208,9 +219,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     isChangingOffset = true;
 
-    // Store the current spirograph
-    const spirographImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
     // Clear any existing fade out interval
     clearInterval(fadeOutInterval);
 
@@ -229,18 +237,19 @@ document.addEventListener("DOMContentLoaded", function () {
         opacity -= 0.1;
         if (opacity <= 0) {
           clearInterval(fadeOutInterval);
-          // Restore the original spirograph without the visualizer
-          ctx.putImageData(spirographImage, 0, 0);
-          // If playing, continue the animation
+          // Clear the visualizer canvas
+          visualizerCtx.clearRect(
+            0,
+            0,
+            visualizerCanvas.width,
+            visualizerCanvas.height
+          );
           if (isPlaying) {
             startAnimation();
+          } else {
+            drawSpirograph(outerRadius, innerRadius, offset);
           }
         } else {
-          // Clear the canvas
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          // Redraw the original spirograph
-          ctx.putImageData(spirographImage, 0, 0);
-          // Draw the fading visualizer on top
           drawOffsetVisualizer(outerRadius, innerRadius, offset, opacity);
         }
       }, 50); // 20 steps over 1 second
