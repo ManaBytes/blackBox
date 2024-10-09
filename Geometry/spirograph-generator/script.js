@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  function drawOffsetVisualizer(outerRadius, innerRadius, offset, opacity = 1) {
+  function drawVisualizer(outerRadius, innerRadius, offset, type, opacity = 1) {
     visualizerCtx.clearRect(
       0,
       0,
@@ -105,7 +105,46 @@ document.addEventListener("DOMContentLoaded", function () {
     visualizerCtx.fillStyle = "red";
     visualizerCtx.fill();
 
-    // No need to draw on the main canvas anymore
+    // Highlight specific elements based on the type
+    switch (type) {
+      case "outer":
+        visualizerCtx.strokeStyle = "rgba(0, 255, 0, 0.7)";
+        visualizerCtx.beginPath();
+        visualizerCtx.arc(x0, y0, outerRadius, 0, Math.PI * 2);
+        visualizerCtx.stroke();
+        break;
+      case "inner":
+        visualizerCtx.strokeStyle = "rgba(0, 0, 255, 0.7)";
+        visualizerCtx.beginPath();
+        visualizerCtx.arc(innerX, innerY, innerRadius, 0, Math.PI * 2);
+        visualizerCtx.stroke();
+        break;
+      case "offset":
+        // The offset is already highlighted in red
+        break;
+    }
+  }
+
+  function drawOffsetVisualizer(outerRadius, innerRadius, offset, opacity = 1) {
+    drawVisualizer(outerRadius, innerRadius, offset, "offset", opacity);
+  }
+
+  function drawOuterRadiusVisualizer(
+    outerRadius,
+    innerRadius,
+    offset,
+    opacity = 1
+  ) {
+    drawVisualizer(outerRadius, innerRadius, offset, "outer", opacity);
+  }
+
+  function drawInnerRadiusVisualizer(
+    outerRadius,
+    innerRadius,
+    offset,
+    opacity = 1
+  ) {
+    drawVisualizer(outerRadius, innerRadius, offset, "inner", opacity);
   }
 
   function setDefaultValues() {
@@ -208,58 +247,62 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  document.getElementById("offset").addEventListener("input", function () {
-    const outerRadius = parseFloat(
-      document.getElementById("outerRadius").value
-    );
-    const innerRadius = parseFloat(
-      document.getElementById("innerRadius").value
-    );
-    const offset = parseFloat(this.value);
+  function addVisualizerToInput(inputId, visualizerFunction) {
+    document.getElementById(inputId).addEventListener("input", function () {
+      const outerRadius = parseFloat(
+        document.getElementById("outerRadius").value
+      );
+      const innerRadius = parseFloat(
+        document.getElementById("innerRadius").value
+      );
+      const offset = parseFloat(document.getElementById("offset").value);
 
-    isChangingOffset = true;
+      // Clear any existing fade out interval
+      clearInterval(fadeOutInterval);
 
-    // Clear any existing fade out interval
-    clearInterval(fadeOutInterval);
+      // Clear any existing timeout
+      clearTimeout(offsetVisualizerTimeout);
 
-    // Clear any existing timeout
-    clearTimeout(offsetVisualizerTimeout);
+      // Immediately draw the visualizer at full opacity
+      visualizerFunction(outerRadius, innerRadius, offset, 1);
 
-    // Immediately draw the visualizer at full opacity
-    drawOffsetVisualizer(outerRadius, innerRadius, offset, 1);
+      // Set a new timeout for 1.5 seconds
+      offsetVisualizerTimeout = setTimeout(() => {
+        let opacity = 1;
 
-    // Set a new timeout for 1.5 seconds
-    offsetVisualizerTimeout = setTimeout(() => {
-      isChangingOffset = false;
-      let opacity = 1;
-
-      fadeOutInterval = setInterval(() => {
-        opacity -= 0.1;
-        if (opacity <= 0) {
-          clearInterval(fadeOutInterval);
-          // Clear the visualizer canvas
-          visualizerCtx.clearRect(
-            0,
-            0,
-            visualizerCanvas.width,
-            visualizerCanvas.height
-          );
-          if (isPlaying) {
-            startAnimation();
+        fadeOutInterval = setInterval(() => {
+          opacity -= 0.1;
+          if (opacity <= 0) {
+            clearInterval(fadeOutInterval);
+            // Clear the visualizer canvas
+            visualizerCtx.clearRect(
+              0,
+              0,
+              visualizerCanvas.width,
+              visualizerCanvas.height
+            );
+            if (isPlaying) {
+              startAnimation();
+            } else {
+              drawSpirograph(outerRadius, innerRadius, offset);
+            }
           } else {
-            drawSpirograph(outerRadius, innerRadius, offset);
+            visualizerFunction(outerRadius, innerRadius, offset, opacity);
           }
-        } else {
-          drawOffsetVisualizer(outerRadius, innerRadius, offset, opacity);
-        }
-      }, 50); // 20 steps over 1 second
-    }, 1500); // Start fading after 1.5 seconds
+        }, 50); // 20 steps over 1 second
+      }, 1500); // Start fading after 1.5 seconds
 
-    // If playing, update the animation
-    if (isPlaying) {
-      startAnimation();
-    }
-  });
+      // If playing, update the animation
+      if (isPlaying) {
+        startAnimation();
+      }
+    });
+  }
+
+  // Add visualizers to inputs
+  addVisualizerToInput("outerRadius", drawOuterRadiusVisualizer);
+  addVisualizerToInput("innerRadius", drawInnerRadiusVisualizer);
+  addVisualizerToInput("offset", drawOffsetVisualizer);
 
   window.addEventListener("resize", resizeCanvas);
   resizeCanvas();
