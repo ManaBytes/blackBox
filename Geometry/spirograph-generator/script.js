@@ -242,6 +242,10 @@ document.addEventListener("DOMContentLoaded", function () {
   inputs.forEach((input) => {
     input.addEventListener("input", function () {
       if (isPlaying) {
+        cancelAnimationFrame(animationId); // Pause the drawing
+        isPlaying = false; // Update the play state
+        updatePlayPauseButton(); // Update the play/pause button
+
         startAnimation();
       }
     });
