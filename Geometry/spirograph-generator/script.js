@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let isPlaying = false;
   let isChangingOffset = false;
   let offsetVisualizerTimeout;
+  let fadeOutInterval;
 
   // Create a temporary canvas for the visualizer
   const visualizerCanvas = document.createElement("canvas");
@@ -210,17 +211,24 @@ document.addEventListener("DOMContentLoaded", function () {
     // Store the current spirograph
     const spirographImage = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    // Draw the offset visualizer
-    drawOffsetVisualizer(outerRadius, innerRadius, offset);
+    // Clear any existing fade out interval
+    clearInterval(fadeOutInterval);
 
+    // Clear any existing timeout
     clearTimeout(offsetVisualizerTimeout);
+
+    // Immediately draw the visualizer at full opacity
+    drawOffsetVisualizer(outerRadius, innerRadius, offset, 1);
+
+    // Set a new timeout for 1.5 seconds
     offsetVisualizerTimeout = setTimeout(() => {
       isChangingOffset = false;
-      // Fade out the visualizer
       let opacity = 1;
-      const fadeOut = setInterval(() => {
+
+      fadeOutInterval = setInterval(() => {
+        opacity -= 0.1;
         if (opacity <= 0) {
-          clearInterval(fadeOut);
+          clearInterval(fadeOutInterval);
           // Restore the original spirograph without the visualizer
           ctx.putImageData(spirographImage, 0, 0);
           // If playing, continue the animation
@@ -228,7 +236,6 @@ document.addEventListener("DOMContentLoaded", function () {
             startAnimation();
           }
         } else {
-          opacity -= 0.1;
           // Clear the canvas
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           // Redraw the original spirograph
@@ -236,8 +243,8 @@ document.addEventListener("DOMContentLoaded", function () {
           // Draw the fading visualizer on top
           drawOffsetVisualizer(outerRadius, innerRadius, offset, opacity);
         }
-      }, 50);
-    }, 500);
+      }, 50); // 20 steps over 1 second
+    }, 1500); // Start fading after 1.5 seconds
 
     // If playing, update the animation
     if (isPlaying) {
