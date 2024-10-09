@@ -245,26 +245,27 @@ document.addEventListener("DOMContentLoaded", function () {
     input.addEventListener("input", function () {
       if (isUpdating) return;
       isUpdating = true;
-  
+
       const wasPlaying = isPlaying; // Store the current play state
-  
+
       if (isPlaying) {
         cancelAnimationFrame(animationId); // Pause the drawing
         isPlaying = false; // Update the play state
         updatePlayPauseButton(); // Update the play/pause button
       }
-  
+
       setTimeout(() => {
         startAnimation();
         if (wasPlaying) {
           isPlaying = true; // Restore the play state
           startAnimation();
         }
+        updatePlayPauseButton(); // Update the play/pause button on resume
         isUpdating = false;
       }, 500); // Adjust the delay time as needed
     });
   });
-  
+
   function addVisualizerToInput(inputId, visualizerFunction) {
     document.getElementById(inputId).addEventListener("input", function () {
       const outerRadius = parseFloat(
