@@ -5,10 +5,16 @@ const DISCOVERY_DOCS = [
 ];
 const SCOPES = "https://www.googleapis.com/auth/youtube.force-ssl";
 
+// Pagination settings
+const BATCH_SIZE = 50; // Number of videos to add in each batch
+const DELAY_BETWEEN_BATCHES = 10000; // Delay between batches in milliseconds (10 seconds)
+
 // DOM element references
 let authorizeButton = document.getElementById("createPlaylist");
 let fileInput = document.getElementById("fileInput");
 let statusDiv = document.getElementById("status");
+let progressDiv = document.getElementById("progress");
+let progressBarFill = document.getElementById("progressBarFill");
 
 // Initialize the Google API client
 function handleClientLoad() {
@@ -80,36 +86,57 @@ function createPlaylist(watchHistory) {
 
 // Add videos to the created playlist
 function addVideosToPlaylist(playlistId, watchHistory) {
-  // Extract unique video IDs from watch history
   let videoIds = watchHistory
     .filter((item) => item.titleUrl)
     .map((item) => item.titleUrl.split("v=")[1])
     .filter((id, index, self) => self.indexOf(id) === index);
 
-  // Create promises for adding each video to the playlist
-  let promises = videoIds.map((videoId) =>
-    gapi.client.youtube.playlistItems.insert({
-      part: "snippet",
-      resource: {
-        snippet: {
-          playlistId: playlistId,
-          resourceId: {
-            kind: "youtube#video",
-            videoId: videoId,
+  let totalVideos = videoIds.length;
+  let addedVideos = 0;
+
+  function addBatch(startIndex) {
+    let endIndex = Math.min(startIndex + BATCH_SIZE, totalVideos);
+    let batchIds = videoIds.slice(startIndex, endIndex);
+
+    let promises = batchIds.map((videoId) =>
+      gapi.client.youtube.playlistItems.insert({
+        part: "snippet",
+        resource: {
+          snippet: {
+            playlistId: playlistId,
+            resourceId: {
+              kind: "youtube#video",
+              videoId: videoId,
+            },
           },
         },
-      },
-    })
-  );
+      })
+    );
 
-  // Execute all promises and update status
-  Promise.all(promises)
-    .then(() => {
-      statusDiv.textContent = "Playlist created successfully!";
-    })
-    .catch((error) => {
-      statusDiv.textContent = "An error occurred: " + error;
-    });
+    Promise.all(promises)
+      .then(() => {
+        addedVideos += batchIds.length;
+        updateProgress(addedVideos, totalVideos);
+
+        if (endIndex < totalVideos) {
+          setTimeout(() => addBatch(endIndex), DELAY_BETWEEN_BATCHES);
+        } else {
+          statusDiv.textContent = "Playlist created successfully!";
+        }
+      })
+      .catch((error) => {
+        statusDiv.textContent = "An error occurred: " + error;
+      });
+  }
+
+  addBatch(0);
+}
+
+function updateProgress(current, total) {
+  let percentage = Math.round((current / total) * 100);
+  progressDiv.textContent = `Progress: ${current}/${total} videos added`;
+  progressBarFill.style.width = percentage + "%";
+  progressBarFill.textContent = percentage + "%";
 }
 
 // Start the client load process when the script is executed
