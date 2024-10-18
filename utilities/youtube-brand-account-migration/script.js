@@ -46,8 +46,16 @@ function initClient() {
 
 // Handle authorization and file processing
 function handleAuthClick() {
-  if (fileInput.files.length === 0) {
-    statusDiv.textContent = "Please select a file first.";
+  const file = fileInput.files[0];
+  const fileError = validateFile(file);
+  if (fileError) {
+    statusDiv.textContent = fileError;
+    return;
+  }
+
+  const privacyStatus = privacySelect.value;
+  if (!["public", "unlisted", "private"].includes(privacyStatus)) {
+    statusDiv.textContent = "Invalid privacy status selected.";
     return;
   }
 
@@ -56,12 +64,15 @@ function handleAuthClick() {
     .signIn()
     .then(function () {
       statusDiv.textContent = "Processing file...";
-      processFile(fileInput.files[0]);
+      processFile(file, privacyStatus);
+    })
+    .catch(function (error) {
+      statusDiv.textContent = "Authentication failed: " + error.message;
     });
 }
 
 // Process the uploaded ZIP file
-function processFile(file) {
+function processFile(file, privacyStatus) {
   let zip = new JSZip();
   zip
     .loadAsync(file)
@@ -73,7 +84,7 @@ function processFile(file) {
     .then(function (content) {
       try {
         let watchHistory = JSON.parse(content);
-        createPlaylist(watchHistory);
+        createPlaylist(watchHistory, privacyStatus);
       } catch (error) {
         statusDiv.textContent = "Error parsing watch history: " + error.message;
       }
@@ -84,7 +95,7 @@ function processFile(file) {
 }
 
 // Create a new playlist
-function createPlaylist(watchHistory) {
+function createPlaylist(watchHistory, privacyStatus) {
   if (quotaUsed + PLAYLIST_INSERT_COST > DAILY_QUOTA) {
     statusDiv.textContent = "Daily quota exceeded. Please try again tomorrow.";
     return;
@@ -99,7 +110,7 @@ function createPlaylist(watchHistory) {
           description: "Playlist created from my watch history",
         },
         status: {
-          privacyStatus: "unlisted",
+          privacyStatus: privacyStatus,
         },
       },
     })
@@ -108,6 +119,9 @@ function createPlaylist(watchHistory) {
       updateQuotaStatus();
       let playlistId = response.result.id;
       addVideosToPlaylist(playlistId, watchHistory);
+    })
+    .catch(function (error) {
+      statusDiv.textContent = "Error creating playlist: " + error.message;
     });
 }
 
@@ -199,6 +213,19 @@ function updateProgress(current, total) {
 function updateQuotaStatus() {
   let percentage = Math.round((quotaUsed / DAILY_QUOTA) * 100);
   quotaStatusDiv.textContent = `API Quota: ${quotaUsed}/${DAILY_QUOTA} units used (${percentage}%)`;
+}
+
+function validateFile(file) {
+  if (!file) {
+    return "Please select a file.";
+  }
+  if (file.type !== "application/zip" && file.type !== "application/x-zip-compressed") {
+    return "Please upload a ZIP file.";
+  }
+  if (file.size > 100 * 1024 * 1024) {
+    return "File size should not exceed 100MB.";
+  }
+  return null;
 }
 
 // Start the client load process when the script is executed
