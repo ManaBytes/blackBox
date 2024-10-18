@@ -5,29 +5,32 @@ const DISCOVERY_DOCS = [
 ];
 const SCOPES = "https://www.googleapis.com/auth/youtube.force-ssl";
 
-// Pagination settings
-const BATCH_SIZE = 50; // Number of videos to add in each batch
-const DELAY_BETWEEN_BATCHES = 10000; // Delay between batches in milliseconds (10 seconds)
-
-// Add these constants after the existing constants
+// API quota settings
 const DAILY_QUOTA = 10000; // Default daily quota for free tier
 const PLAYLIST_INSERT_COST = 50; // Cost to create a new playlist
 const PLAYLIST_ITEM_INSERT_COST = 50; // Cost to add an item to a playlist
 
-// DOM element references
+// Pagination settings
+const BATCH_SIZE = 50; // Number of videos to add in each batch
+const DELAY_BETWEEN_BATCHES = 10000; // Delay between batches in milliseconds (10 seconds)
+
 let authorizeButton = document.getElementById("createPlaylist");
+let resumeButton = document.getElementById("resumeButton");
 let fileInput = document.getElementById("fileInput");
+let privacySelect = document.getElementById("privacySelect");
 let statusDiv = document.getElementById("status");
 let progressDiv = document.getElementById("progress");
+let quotaStatusDiv = document.getElementById("quotaStatus");
 let progressBarFill = document.getElementById("progressBarFill");
 
-// Add this variable with the other DOM element references
-let quotaStatusDiv = document.getElementById("quotaStatus");
-
-// Add this variable after the DOM element references
 let quotaUsed = 0;
+let state = {
+  playlistId: null,
+  videoIds: [],
+  addedVideos: 0,
+  totalVideos: 0,
+};
 
-// Initialize the Google API client
 function handleClientLoad() {
   gapi.load("client:auth2", initClient);
 }
@@ -41,10 +44,11 @@ function initClient() {
     })
     .then(function () {
       authorizeButton.onclick = handleAuthClick;
+      resumeButton.onclick = handleResumeClick;
+      loadState();
     });
 }
 
-// Handle authorization and file processing
 function handleAuthClick() {
   if (fileInput.files.length === 0) {
     statusDiv.textContent = "Please select a file first.";
@@ -60,7 +64,16 @@ function handleAuthClick() {
     });
 }
 
-// Process the uploaded ZIP file
+function handleResumeClick() {
+  gapi.auth2
+    .getAuthInstance()
+    .signIn()
+    .then(function () {
+      statusDiv.textContent = "Resuming...";
+      addVideosToPlaylist(state.playlistId, state.videoIds);
+    });
+}
+
 function processFile(file) {
   let zip = new JSZip();
   zip.loadAsync(file).then(function (contents) {
@@ -74,7 +87,6 @@ function processFile(file) {
   });
 }
 
-// Create a new playlist
 function createPlaylist(watchHistory) {
   if (quotaUsed + PLAYLIST_INSERT_COST > DAILY_QUOTA) {
     statusDiv.textContent = "Daily quota exceeded. Please try again tomorrow.";
@@ -90,43 +102,44 @@ function createPlaylist(watchHistory) {
           description: "Playlist created from my watch history",
         },
         status: {
-          privacyStatus: "unlisted",
+          privacyStatus: privacySelect.value,
         },
       },
     })
     .then(function (response) {
       quotaUsed += PLAYLIST_INSERT_COST;
       updateQuotaStatus();
-      let playlistId = response.result.id;
-      addVideosToPlaylist(playlistId, watchHistory);
+      state.playlistId = response.result.id;
+      state.videoIds = watchHistory
+        .filter((item) => item.titleUrl)
+        .map((item) => item.titleUrl.split("v=")[1])
+        .filter((id, index, self) => self.indexOf(id) === index);
+      state.totalVideos = state.videoIds.length;
+      state.addedVideos = 0;
+      saveState();
+      addVideosToPlaylist(state.playlistId, state.videoIds);
     });
 }
 
-// Add videos to the created playlist
-function addVideosToPlaylist(playlistId, watchHistory) {
-  let videoIds = watchHistory
-    .filter((item) => item.titleUrl)
-    .map((item) => item.titleUrl.split("v=")[1])
-    .filter((id, index, self) => self.indexOf(id) === index);
-
-  let totalVideos = videoIds.length;
-  let addedVideos = 0;
-
+function addVideosToPlaylist(playlistId, videoIds) {
   function addBatch(startIndex) {
-    let endIndex = Math.min(startIndex + BATCH_SIZE, totalVideos);
+    let endIndex = Math.min(startIndex + BATCH_SIZE, state.totalVideos);
     let batchIds = videoIds.slice(startIndex, endIndex);
 
     let availableQuota = DAILY_QUOTA - quotaUsed;
     let batchCost = batchIds.length * PLAYLIST_ITEM_INSERT_COST;
 
     if (batchCost > availableQuota) {
-      let possibleAdds = Math.floor(availableQuota / PLAYLIST_ITEM_INSERT_COST);
+      let possibleAdds = Math.floor(
+        availableQuota / PLAYLIST_ITEM_INSERT_COST
+      );
       batchIds = batchIds.slice(0, possibleAdds);
       endIndex = startIndex + possibleAdds;
     }
 
     if (batchIds.length === 0) {
       statusDiv.textContent = "Daily quota reached. Progress saved.";
+      saveState();
       return;
     }
 
@@ -147,26 +160,29 @@ function addVideosToPlaylist(playlistId, watchHistory) {
 
     Promise.all(promises)
       .then(() => {
-        addedVideos += batchIds.length;
+        state.addedVideos += batchIds.length;
         quotaUsed += batchIds.length * PLAYLIST_ITEM_INSERT_COST;
-        updateProgress(addedVideos, totalVideos);
+        updateProgress(state.addedVideos, state.totalVideos);
         updateQuotaStatus();
+        saveState();
 
-        if (endIndex < totalVideos && quotaUsed < DAILY_QUOTA) {
+        if (endIndex < state.totalVideos && quotaUsed < DAILY_QUOTA) {
           setTimeout(() => addBatch(endIndex), DELAY_BETWEEN_BATCHES);
         } else {
           statusDiv.textContent =
-            addedVideos === totalVideos
+            state.addedVideos === state.totalVideos
               ? "Playlist created successfully!"
               : "Daily quota reached. Partial playlist created.";
+          saveState();
         }
       })
       .catch((error) => {
         statusDiv.textContent = "An error occurred: " + error;
+        saveState();
       });
   }
 
-  addBatch(0);
+  addBatch(state.addedVideos);
 }
 
 function updateProgress(current, total) {
@@ -176,11 +192,36 @@ function updateProgress(current, total) {
   progressBarFill.textContent = percentage + "%";
 }
 
-// Add this new function at the end of the file
 function updateQuotaStatus() {
   let percentage = Math.round((quotaUsed / DAILY_QUOTA) * 100);
   quotaStatusDiv.textContent = `API Quota: ${quotaUsed}/${DAILY_QUOTA} units used (${percentage}%)`;
 }
 
-// Start the client load process when the script is executed
+function saveState() {
+  localStorage.setItem(
+    "youtubePlaylistCreatorState",
+    JSON.stringify(state)
+  );
+  localStorage.setItem(
+    "youtubePlaylistCreatorQuota",
+    quotaUsed.toString()
+  );
+}
+
+function loadState() {
+  let savedState = localStorage.getItem("youtubePlaylistCreatorState");
+  let savedQuota = localStorage.getItem("youtubePlaylistCreatorQuota");
+
+  if (savedState) {
+    state = JSON.parse(savedState);
+    quotaUsed = parseInt(savedQuota) || 0;
+    updateProgress(state.addedVideos, state.totalVideos);
+    updateQuotaStatus();
+
+    if (state.addedVideos < state.totalVideos) {
+      resumeButton.style.display = "inline-block";
+    }
+  }
+}
+
 handleClientLoad();

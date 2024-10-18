@@ -12,10 +12,19 @@
     <div class="container">
       <h1>YouTube Watch History Playlist Creator</h1>
       <input type="file" id="fileInput" accept=".zip" />
+      <select id="privacySelect">
+        <option value="public">Public</option>
+        <option value="unlisted" selected>Unlisted</option>
+        <option value="private">Private</option>
+      </select>
       <button id="createPlaylist">Create Playlist</button>
+      <button id="resumeButton" style="display: none">Resume</button>
       <div id="status"></div>
       <div id="progress"></div>
       <div id="quotaStatus"></div>
+      <div id="progressBar">
+        <div id="progressBarFill"></div>
+      </div>
     </div>
 
     <script src="script.js"></script>
