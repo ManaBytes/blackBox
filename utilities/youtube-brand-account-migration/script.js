@@ -9,12 +9,23 @@ const SCOPES = "https://www.googleapis.com/auth/youtube.force-ssl";
 const BATCH_SIZE = 50; // Number of videos to add in each batch
 const DELAY_BETWEEN_BATCHES = 10000; // Delay between batches in milliseconds (10 seconds)
 
+// Add these constants after the existing constants
+const DAILY_QUOTA = 10000; // Default daily quota for free tier
+const PLAYLIST_INSERT_COST = 50; // Cost to create a new playlist
+const PLAYLIST_ITEM_INSERT_COST = 50; // Cost to add an item to a playlist
+
 // DOM element references
 let authorizeButton = document.getElementById("createPlaylist");
 let fileInput = document.getElementById("fileInput");
 let statusDiv = document.getElementById("status");
 let progressDiv = document.getElementById("progress");
 let progressBarFill = document.getElementById("progressBarFill");
+
+// Add this variable with the other DOM element references
+let quotaStatusDiv = document.getElementById("quotaStatus");
+
+// Add this variable after the DOM element references
+let quotaUsed = 0;
 
 // Initialize the Google API client
 function handleClientLoad() {
@@ -65,6 +76,11 @@ function processFile(file) {
 
 // Create a new playlist
 function createPlaylist(watchHistory) {
+  if (quotaUsed + PLAYLIST_INSERT_COST > DAILY_QUOTA) {
+    statusDiv.textContent = "Daily quota exceeded. Please try again tomorrow.";
+    return;
+  }
+
   gapi.client.youtube.playlists
     .insert({
       part: "snippet,status",
@@ -79,6 +95,8 @@ function createPlaylist(watchHistory) {
       },
     })
     .then(function (response) {
+      quotaUsed += PLAYLIST_INSERT_COST;
+      updateQuotaStatus();
       let playlistId = response.result.id;
       addVideosToPlaylist(playlistId, watchHistory);
     });
@@ -98,6 +116,20 @@ function addVideosToPlaylist(playlistId, watchHistory) {
     let endIndex = Math.min(startIndex + BATCH_SIZE, totalVideos);
     let batchIds = videoIds.slice(startIndex, endIndex);
 
+    let availableQuota = DAILY_QUOTA - quotaUsed;
+    let batchCost = batchIds.length * PLAYLIST_ITEM_INSERT_COST;
+
+    if (batchCost > availableQuota) {
+      let possibleAdds = Math.floor(availableQuota / PLAYLIST_ITEM_INSERT_COST);
+      batchIds = batchIds.slice(0, possibleAdds);
+      endIndex = startIndex + possibleAdds;
+    }
+
+    if (batchIds.length === 0) {
+      statusDiv.textContent = "Daily quota reached. Progress saved.";
+      return;
+    }
+
     let promises = batchIds.map((videoId) =>
       gapi.client.youtube.playlistItems.insert({
         part: "snippet",
@@ -116,12 +148,17 @@ function addVideosToPlaylist(playlistId, watchHistory) {
     Promise.all(promises)
       .then(() => {
         addedVideos += batchIds.length;
+        quotaUsed += batchIds.length * PLAYLIST_ITEM_INSERT_COST;
         updateProgress(addedVideos, totalVideos);
+        updateQuotaStatus();
 
-        if (endIndex < totalVideos) {
+        if (endIndex < totalVideos && quotaUsed < DAILY_QUOTA) {
           setTimeout(() => addBatch(endIndex), DELAY_BETWEEN_BATCHES);
         } else {
-          statusDiv.textContent = "Playlist created successfully!";
+          statusDiv.textContent =
+            addedVideos === totalVideos
+              ? "Playlist created successfully!"
+              : "Daily quota reached. Partial playlist created.";
         }
       })
       .catch((error) => {
@@ -137,6 +174,12 @@ function updateProgress(current, total) {
   progressDiv.textContent = `Progress: ${current}/${total} videos added`;
   progressBarFill.style.width = percentage + "%";
   progressBarFill.textContent = percentage + "%";
+}
+
+// Add this new function at the end of the file
+function updateQuotaStatus() {
+  let percentage = Math.round((quotaUsed / DAILY_QUOTA) * 100);
+  quotaStatusDiv.textContent = `API Quota: ${quotaUsed}/${DAILY_QUOTA} units used (${percentage}%)`;
 }
 
 // Start the client load process when the script is executed
