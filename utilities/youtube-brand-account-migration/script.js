@@ -5,15 +5,16 @@ const DISCOVERY_DOCS = [
 ];
 const SCOPES = "https://www.googleapis.com/auth/youtube.force-ssl";
 
+// Pagination settings
+const BATCH_SIZE = 50; // Number of videos to add in each batch
+const DELAY_BETWEEN_BATCHES = 10000; // Delay between batches in milliseconds (10 seconds)
+
 // API quota settings
 const DAILY_QUOTA = 10000; // Default daily quota for free tier
 const PLAYLIST_INSERT_COST = 50; // Cost to create a new playlist
 const PLAYLIST_ITEM_INSERT_COST = 50; // Cost to add an item to a playlist
 
-// Pagination settings
-const BATCH_SIZE = 50; // Number of videos to add in each batch
-const DELAY_BETWEEN_BATCHES = 10000; // Delay between batches in milliseconds (10 seconds)
-
+// DOM element references
 let authorizeButton = document.getElementById("createPlaylist");
 let resumeButton = document.getElementById("resumeButton");
 let fileInput = document.getElementById("fileInput");
@@ -22,6 +23,7 @@ let statusDiv = document.getElementById("status");
 let progressDiv = document.getElementById("progress");
 let quotaStatusDiv = document.getElementById("quotaStatus");
 let progressBarFill = document.getElementById("progressBarFill");
+let modeToggle = document.getElementById("modeToggle");
 
 let quotaUsed = 0;
 let state = {
@@ -69,7 +71,6 @@ function handleResumeClick() {
     .getAuthInstance()
     .signIn()
     .then(function () {
-      statusDiv.textContent = "Resuming...";
       addVideosToPlaylist(state.playlistId, state.videoIds);
     });
 }
@@ -130,9 +131,7 @@ function addVideosToPlaylist(playlistId, videoIds) {
     let batchCost = batchIds.length * PLAYLIST_ITEM_INSERT_COST;
 
     if (batchCost > availableQuota) {
-      let possibleAdds = Math.floor(
-        availableQuota / PLAYLIST_ITEM_INSERT_COST
-      );
+      let possibleAdds = Math.floor(availableQuota / PLAYLIST_ITEM_INSERT_COST);
       batchIds = batchIds.slice(0, possibleAdds);
       endIndex = startIndex + possibleAdds;
     }
@@ -198,14 +197,8 @@ function updateQuotaStatus() {
 }
 
 function saveState() {
-  localStorage.setItem(
-    "youtubePlaylistCreatorState",
-    JSON.stringify(state)
-  );
-  localStorage.setItem(
-    "youtubePlaylistCreatorQuota",
-    quotaUsed.toString()
-  );
+  localStorage.setItem("youtubePlaylistCreatorState", JSON.stringify(state));
+  localStorage.setItem("youtubePlaylistCreatorQuota", quotaUsed.toString());
 }
 
 function loadState() {
@@ -222,6 +215,21 @@ function loadState() {
       resumeButton.style.display = "inline-block";
     }
   }
+}
+
+modeToggle.addEventListener("click", function () {
+  document.body.classList.toggle("dark-mode");
+  document.body.classList.toggle("light-mode");
+  localStorage.setItem(
+    "colorMode",
+    document.body.classList.contains("dark-mode") ? "dark" : "light"
+  );
+});
+
+// Set initial color mode
+if (localStorage.getItem("colorMode") === "light") {
+  document.body.classList.remove("dark-mode");
+  document.body.classList.add("light-mode");
 }
 
 handleClientLoad();

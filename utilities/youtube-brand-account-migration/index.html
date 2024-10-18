@@ -8,7 +8,8 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
+  <body class="dark-mode">
+    <button id="modeToggle">Toggle Light/Dark Mode</button>
     <div class="container">
       <h1>YouTube Watch History Playlist Creator</h1>
       <input type="file" id="fileInput" accept=".zip" />
@@ -26,7 +27,16 @@
         <div id="progressBarFill"></div>
       </div>
     </div>
-
+    <div id="instructions">
+      <h2>Instructions</h2>
+      <ol>
+        <li>Download your YouTube data from Google Takeout.</li>
+        <li>Upload the ZIP file containing your watch history.</li>
+        <li>Select the privacy setting for your new playlist.</li>
+        <li>Click "Create Playlist" to start the process.</li>
+        <li>If the process is interrupted, you can click "Resume" to continue.</li>
+      </ol>
+    </div>
     <script src="script.js"></script>
   </body>
 </html>

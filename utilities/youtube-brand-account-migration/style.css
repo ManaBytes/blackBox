@@ -3,40 +3,50 @@ body {
   line-height: 1.6;
   margin: 0;
   padding: 20px;
+  transition: background-color 0.3s, color 0.3s;
+}
+body.dark-mode {
+  background-color: #1a1a1a;
+  color: #f4f4f4;
+}
+body.light-mode {
   background-color: #f4f4f4;
+  color: #333;
 }
 .container {
   max-width: 800px;
   margin: 0 auto;
-  background-color: #fff;
   padding: 20px;
   border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  transition: background-color 0.3s;
 }
-h1 {
-  color: #333;
+.dark-mode .container {
+  background-color: #2a2a2a;
 }
-#fileInput,
-#privacySelect {
+.light-mode .container {
+  background-color: #fff;
+}
+h1, h2 {
+  color: #4CAF50;
+}
+#fileInput, #privacySelect {
   margin-bottom: 10px;
 }
-#createPlaylist,
-#resumeButton {
-  background-color: #4caf50;
+button {
+  background-color: #4CAF50;
   color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   margin-right: 10px;
+  transition: background-color 0.3s;
 }
-#createPlaylist:hover,
-#resumeButton:hover {
+button:hover {
   background-color: #45a049;
 }
-#status,
-#progress,
-#quotaStatus {
+#status, #progress, #quotaStatus {
   margin-top: 20px;
   font-weight: bold;
 }
@@ -49,9 +59,24 @@ h1 {
 #progressBarFill {
   width: 0%;
   height: 30px;
-  background-color: #4caf50;
+  background-color: #4CAF50;
   border-radius: 5px;
   text-align: center;
   line-height: 30px;
   color: white;
+}
+#modeToggle {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+}
+#instructions {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: rgba(0,0,0,0.05);
+  border-radius: 5px;
+}
+.dark-mode #instructions {
+  background-color: rgba(255,255,255,0.05);
 }
