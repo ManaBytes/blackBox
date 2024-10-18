@@ -1,3 +1,5 @@
+// To like or not to like. API and ToS investigation.
+
 // Configuration constants
 const CLIENT_ID = "YOUR_CLIENT_ID_HERE";
 const DISCOVERY_DOCS = [
@@ -219,7 +221,10 @@ function validateFile(file) {
   if (!file) {
     return "Please select a file.";
   }
-  if (file.type !== "application/zip" && file.type !== "application/x-zip-compressed") {
+  if (
+    file.type !== "application/zip" &&
+    file.type !== "application/x-zip-compressed"
+  ) {
     return "Please upload a ZIP file.";
   }
   if (file.size > 100 * 1024 * 1024) {
